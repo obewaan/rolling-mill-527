@@ -117,6 +117,9 @@ table.t2 th { width: 36%; }
 table.t2 td, table.t3 td { padding: 5px 0; vertical-align: top; white-space: pre-line; font-variant-numeric: tabular-nums; }
 table.t3 .sub { color: var(--muted); font-size: 11.5px; margin-top: 1px; }
 table.t3 td.i { text-align: right; padding-left: 8px; width: 1%; }
+table.t3 td.q { text-align: right; padding-left: 10px; width: 1%; white-space: nowrap; font-family: var(--f-mono); font-size: 11.5px; }
+table.tq tr.tot td { border-top: 1px solid var(--line); font-weight: 500; background: none; }
+.src table.tq + div { margin-top: 2px; }
 table.t2 tr + tr > *, table.t3 tr + tr > * { border-top: 1px solid var(--line); }
 .chip { display: inline-block; font-family: var(--f-mono); font-size: 10.5px; line-height: 1.5; padding: 0 6px; border-radius: 3px; background: var(--chip); border: 1px solid var(--line); white-space: nowrap; color: var(--ink); }
 .chip.hi { background: var(--accent-soft); border-color: var(--accent); }
@@ -225,6 +228,40 @@ table.tq tbody tr:nth-child(odd) { background: var(--chip); }
       </div>
       <div class="sec">
         <details>
+          <summary>Подшипники валков и ГСМ</summary>
+          <div class="src">
+            <table class="tq">
+              <thead><tr><th>Подшипник</th><th>d, мм</th><th>Клети</th><th>Шт.</th></tr></thead>
+              <tbody>
+                <tr><td>24072</td><td>360</td><td>черновая</td><td>6</td></tr>
+                <tr><td>24052</td><td>260</td><td>C1–C2</td><td>8</td></tr>
+                <tr><td>24048</td><td>240</td><td>C3–C4</td><td>8</td></tr>
+                <tr><td>24040</td><td>200</td><td>C5–C6</td><td>8</td></tr>
+                <tr><td>24032</td><td>160</td><td>C7–C10</td><td>16</td></tr>
+                <tr><td>24030</td><td>150</td><td>C11–C16</td><td>24</td></tr>
+                <tr class="tot"><td>Итого</td><td></td><td>17 клетей</td><td>70</td></tr>
+              </tbody>
+            </table>
+            <div>Сферические роликовые CCK30/W33 C3: конусное отверстие, посадка на разрезной гайке. Тип — по мануалам клетей; количество — по конструкции узла валка: 2 подушки на валок, у дуо 4 шт. на клеть, у трио 6. Подшипники редукторов, рольгангов и прочего оборудования в мануалах не перечислены — см. 527-P-018 «Mill Bearing List».</div>
+            <table class="tq">
+              <thead><tr><th>Ёмкость</th><th>Масло</th><th>л</th></tr></thead>
+              <tbody>
+                <tr><td>Смазка №1 · черновая</td><td>VG 320</td><td>3 000</td></tr>
+                <tr><td>Смазка №2 · C1–C3</td><td>VG 320</td><td>3 000</td></tr>
+                <tr><td>Смазка №3 · C4–C7</td><td>VG 320</td><td>3 000</td></tr>
+                <tr><td>Смазка №4 · C8–C11</td><td>VG 320</td><td>3 000</td></tr>
+                <tr><td>Смазка №5 · C12–C16</td><td>VG 320</td><td>3 000</td></tr>
+                <tr><td>Гидростанция ножниц 30</td><td>VG 68</td><td>1 000</td></tr>
+                <tr class="tot"><td>Итого ISO VG 320</td><td></td><td>15 000</td></tr>
+                <tr class="tot"><td>Итого ISO VG 68</td><td></td><td>1 000</td></tr>
+              </tbody>
+            </table>
+            <div>Замена масла — каждые 5000–6000 ч или раз в год. Пластичная смазка EP2 — переносные станции, объём не указан. Объёмы картеров редукторов и мотор-редукторов, ножниц и остальных гидростанций в мануалах не приведены — см. 527-U-009 и P527-U-005.</div>
+          </div>
+        </details>
+      </div>
+      <div class="sec">
+        <details>
           <summary>Моменты затяжки болтов</summary>
           <div class="src">
             <div>Н·м по документу PBL-10sh01, коэффициент трения 0,14. На этот документ ссылаются все мануалы оборудования.</div>
@@ -255,7 +292,7 @@ table.tq tbody tr:nth-child(odd) { background: var(--chip); }
           <div class="src">
             <div><b>Расстановка оборудования, оси, отметки:</b> план 527-101sh01 rev.8 (13.07.24), разрез по цеху на том же листе.</div>
             <div><b>Здание:</b> UZLE-EE-AZ-KRK-01-01-AR-001…023 (РП, 03.03.2025): размеры, отметки, окна, ворота, отделка. Разрез 1-1 (утв. 28.06.24). Схема колонн и связей (02.08.24).</div>
-            <div><b>Описания оборудования:</b> руководства по монтажу, эксплуатации и обслуживанию P-527 (Preet Brothers, 1-е изд., окт.–нояб. 2024) — клети, ножницы, петлеобразователи, TMT, тянущие ролики, холодильник, рольганги, редукторы, централизованная смазка 300 л/мин. В карточке объекта: вкладки «Конструкция», «Износ», «Смазка и ТО».</div>
+            <div><b>Описания оборудования:</b> руководства по монтажу, эксплуатации и обслуживанию P-527 (Preet Brothers, 1-е изд., окт.–нояб. 2024) — клети, ножницы, петлеобразователи, TMT, тянущие ролики, холодильник, рольганги, редукторы, централизованная смазка 300 л/мин. В карточке объекта: вкладки «Конструкция» (с подшипниками), «Износ», «Смазка и ТО» (с объёмами ГСМ).</div>
             <div><b>Оборудование:</b> GA 527-231p1 (черновая клеть), 527-315p1 (клети C1–C2), CTE 1119-00 R8 (печь), P527-302sh01 r1 (краны), 527-804 (водное хозяйство), 527-800 (ECR).</div>
             <div>Оборудование показано упрощённо (уровень детализации LOD 200): положение и габариты в плане сняты с чертежа, высоты взяты из GA-чертежей или приняты типовыми. Вспомогательные здания показаны по плану 527-101; в РП UZLITI их состав и привязка отличаются.</div>
             <div class="mono">Координаты: X от оси 1, Z от оси А, м. 1 клетка подложки = чертёж 1:1.</div>
@@ -1292,7 +1329,7 @@ make('compressor', 48, { facts: ['Сжатый воздух 325 CFM при 8,5 �
 make('lab', 43, { facts: ['Лабораторное помещение с кабельным каналом 300 × 300'], dwg: '527-101sh01 r8' }, (b) => shed(b, X(2197400), Z(-681800), X(2211550), Z(-686350), 3.6), annexRoot);
 make('store', 45, { facts: ['Склад запчастей и материалов'], dwg: '527-101sh01 r8' }, (b) => shed(b, X(2215600), Z(-680250), X(2243200), Z(-686200), 4.5), annexRoot);
 make('water', 40, {
-  facts: ['Отстойник окалины 450 м³, горячий колодец TMT 245 м³ (дно −7,0…−8,1)', 'Холодный колодец TMT 190 м³ и колодец ICW 150 м³ на отм. +5,000, градирня 3,6 × 3,6 м', 'ICW стана 150 м³/ч; DCW стана 450 м³/ч; DCW TMT 300 м³/ч'],
+  facts: ['Отстойник окалины 450 м³, горячий колодец TMT 245 м³ (дно −7,0…−8,1)', 'Холодный колодец TMT 190 м³ и колодец ICW 150 м³ на отм. +5,000, градирня 3,6 × 3,6 м', 'Насосная галерея вдоль резервуаров — 7 насосов: P-4A…P-4D (4 шт.) из последней камеры отстойника и P-3A…P-3C (3 шт.) из горячего колодца TMT, всас 200 NB; пол галереи −2,550 / −1,900', 'Насосная +0,300 у холодных колодцев: P-2A…P-2C (TMT) и P-1A, P-1B (ICW)', 'ICW стана 150 м³/ч; DCW стана 450 м³/ч; DCW TMT 300 м³/ч'],
   dwg: '527-804sh01–08 r1–r3 (11.07.24) · 527-801sh01', ly: 9.5,
 }, (b) => {
   const xs = [2120100, 2127000, 2134000, 2141000, 2150000, 2156100, 2162100].map(X);
@@ -1310,7 +1347,18 @@ make('water', 40, {
   boxMM(b, M.annex, X(2162100), 0, Z(-748200), X(2180100), 4.2, Z(-751300));
   boxMM(b, M.annexRoof, X(2162000), 4.2, Z(-748100), X(2180200), 4.35, Z(-751400));
   boxMM(b, M.concrete, X(2141000), 0, Z(-748500), X(2156100), 0.3, Z(-752400));
-  for (let x = X(2142200); x < X(2155800); x += 2.3) { box(b, M.pipeWater, 0.7, 0.8, 0.9, x, 0.3, Z(-750500)); box(b, M.motor, 0.5, 0.5, 0.8, x, 1.1, Z(-749600)); cyl(b, M.pipeWater, 0.1, 3.0, 'y', x, -0.5, Z(-751800), 8); }
+  // pump gallery north of the tanks (527-804sh01): P-4A…P-4D draw from the last settling chamber, P-3A…P-3C from the TMT hot well
+  const PUMPS = [['P-4A', 2142680], ['P-4B', 2144510], ['P-4C', 2146400], ['P-4D', 2148200], ['P-3A', 2150200], ['P-3B', 2152390], ['P-3C', 2154600]];
+  for (const [, xw] of PUMPS) {
+    const x = X(xw), yc = 0.72;
+    box(b, M.steelDark, 0.8, 0.12, 1.55, x, 0.3, Z(-749950));                       // base frame
+    cyl(b, M.motor, 0.26, 0.78, 'z', x, yc, Z(-749480), 16);                        // motor
+    cyl(b, M.steelDark, 0.12, 0.3, 'z', x, yc, Z(-750020), 10);                     // coupling guard
+    cyl(b, M.pipeWater, 0.33, 0.24, 'z', x, yc, Z(-750420), 18);                    // volute
+    cyl(b, M.pipeWater, 0.11, 0.3, 'x', x + 0.2, yc, Z(-750420), 10);               // branch to the riser
+    cyl(b, M.pipeWater, 0.11, 2.95, 'z', x + 0.32, yc, Z(-751900), 10);             // 200 NB across the wall
+    cyl(b, M.pipeWater, 0.11, 2.9, 'y', x + 0.32, yc - 1.45, Z(-753380), 10);       // riser into the tank
+  }
 }, annexRoot);
 
 // ---------------------------------------------------------------------------
@@ -1985,7 +2033,82 @@ MAN.hpp4 = {
 // group cards for legend clicks that select several objects
 MAN_NO[14] = CROP('Между клетями C2–C3 и C8–C9', '500 (C2–C3) / 0–900 (C8–C9)', '4,27 (C2–C3) / 7,7 (C8–C9)');
 MAN_NO[18] = LOOPER;
-MAN_NO[44] = LUBE300;
+
+// ---------------------------------------------------------------------------
+// Bearings and fill volumes. The manuals give roll bearing types per stand and
+// tank capacities of the 5 lubrication systems (3000 l) and the cold shear power pack (1000 l).
+// brg: [[unit, bearing, qty]], oil: [[unit, lubricant, volume]]
+// ---------------------------------------------------------------------------
+const LUBE_SYS = [
+  [1, 'черновая клеть 610', ['rough']],
+  [2, 'клети C1–C3', ['C1', 'C2', 'C3']],
+  [3, 'клети C4–C7', ['C4', 'C5', 'C6', 'C7']],
+  [4, 'клети C8–C11', ['C8', 'C9', 'C10', 'C11']],
+  [5, 'клети C12–C16', ['C12', 'C13', 'C14', 'C15', 'C16']],
+];
+const sysOf = (id) => LUBE_SYS.find((s) => s[2].includes(id))[0];
+const BRG_NOTE = 'Количество подшипников валков — по конструкции узла валка в мануале: по одному подшипнику в подушке приводной и неприводной стороны. Перечня всех подшипников с количеством в мануалах нет — он в документе 527-P-018 «Mill Bearing List».';
+const GREASE_OIL = ['Подшипники и втулки', 'Пластичная смазка EP2, переносная станция', 'не указан'];
+const OIL_SRC = 'Ёмкости баков — по мануалам «300 LPM Centralized Oil Lubrication System» и «Hydraulic Cold Shear». Объёмы картеров и прочих гидростанций в мануалах не приведены (527-U-009, P527-U-005).';
+const nStands = (n) => `${n} клет${n % 10 >= 2 && n % 10 <= 4 && (n < 10 || n > 20) ? 'и' : 'ей'}`;
+
+function standExtra(cls, ids) {
+  const c = SCLS[cls], n = ids.length;
+  const brg = [
+    [n > 1 ? `Валки: ${nStands(n)} × 2 валка × 2 подушки` : 'Валки: 2 валка × 2 подушки', `Сферические роликовые ${c.brg}, отверстие ${c.bore} мм`, `${4 * n} шт.`],
+    [n > 1 ? 'Редукторы-шестерённые клети' : 'Редуктор-шестерённая клеть', 'Подшипники качения; количество в мануале не указано', '—'],
+  ];
+  const oil = [];
+  for (const sys of [...new Set(ids.map(sysOf))]) {
+    const st = ids.filter((id) => sysOf(id) === sys), S = LUBE_SYS[sys - 1];
+    oil.push([`${st.length > 1 ? 'Редукторы-шестерённые клети' : 'Редуктор-шестерённая клеть'} ${st.join(', ')}`,
+      `ISO VG 320, циркуляционная: станция смазки №${sys}, общая на ${S[1]}`, 'бак 3000 л']);
+  }
+  oil.push(GREASE_OIL);
+  return { brg, brgNote: BRG_NOTE, oil, oilNote: OIL_SRC };
+}
+function withStandExtra(m, cls, ids) {
+  const x = standExtra(cls, ids), n = ids.length;
+  const spec = m.spec.map(([k, v]) => k === 'Подшипники валков' ? [k, `${v}\n4 шт. на клеть${n > 1 ? `, всего ${4 * n}` : ''}`] : [k, v]);
+  return { ...m, spec, ...x };
+}
+for (const [id, cls] of [['C1', 460], ['C2', 460], ['C3', 410], ['C4', 410], ['C5', 360], ['C6', 360], ['C7', 310], ['C8', 310], ['C9', 310], ['C10', 310],
+  ['C11', 260], ['C12', 260], ['C13', 260], ['C14', 260], ['C15', 260], ['C16', 260]]) MAN['stand' + id] = withStandExtra(MAN['stand' + id], cls, [id]);
+for (const [no, cls, ids] of [[13, 460, ['C1', 'C2']], [15, 410, ['C3', 'C4']], [16, 360, ['C5', 'C6']], [17, 310, ['C7', 'C8', 'C9', 'C10']], [19, 260, ['C11', 'C12', 'C13', 'C14', 'C15', 'C16']]])
+  MAN_NO[no] = withStandExtra(MAN_NO[no], cls, ids);
+
+MAN.rough = {
+  ...MAN.rough,
+  spec: MAN.rough.spec.map(([k, v]) => k === 'Подшипники валков' ? [k, v + '\n6 шт. (3 валка × 2 подушки)'] : [k, v]),
+  brg: [
+    ['Валки: 3 валка × 2 подушки', 'Сферические роликовые 24072 CCK30/W33 C3, отверстие 360 мм', '6 шт.'],
+    ['Редуктор 1360 CRS и шестерённая клеть 610 CRS', 'Подшипники качения; количество в мануале не указано', '—'],
+  ],
+  brgNote: BRG_NOTE,
+  oil: [['Редуктор 1360 CRS и шестерённая клеть', 'ISO VG 320, циркуляционная: станция смазки №1', 'бак 3000 л'], GREASE_OIL],
+  oilNote: OIL_SRC,
+};
+
+const LUBE_NOTE = 'Станции в модели сопоставлены с системами 1–5 мануала по порядку вдоль стана.';
+for (const [i, serves] of LUBE_SYS) {
+  MAN['lube' + i] = {
+    ...LUBE300,
+    spec: [['Система', `№${i} по мануалу`], ['Обслуживает', `${serves}: редуктор${i === 1 ? '' : 'ы'} и шестерённ${i === 1 ? 'ая клеть' : 'ые клети'}`], ...LUBE300.spec],
+    oil: [['Бак станции', 'Масло ISO VG 320', '3000 л']],
+    oilNote: OIL_SRC,
+    notes: [...LUBE300.notes, LUBE_NOTE],
+  };
+}
+MAN_NO[44] = {
+  ...LUBE300,
+  spec: [['Систем', '5 (на каждой 1 рабочий + 1 резервный насос)'], ...LUBE_SYS.map(([i, serves]) => [`Система №${i}`, serves]), ...LUBE300.spec.filter(([k]) => k !== 'Бак')],
+  oil: [...LUBE_SYS.map(([i, serves]) => [`Станция №${i}`, `ISO VG 320 · ${serves}`, '3000 л']), ['Итого', 'ISO VG 320', '15 000 л']],
+  oilNote: OIL_SRC,
+  notes: [...LUBE300.notes, LUBE_NOTE],
+};
+const COLD_OIL = [['Бак гидростанции', 'Гидравлическое масло ISO VG 68', '1000 л'], ['Подшипники, втулки, направляющие', 'Пластичная смазка EP2, переносная станция', 'не указан']];
+MAN.coldshear = { ...MAN.coldshear, oil: COLD_OIL, oilNote: OIL_SRC };
+MAN.hpp4 = { ...MAN.hpp4, oil: [COLD_OIL[0]], oilNote: OIL_SRC };
 
 // ---------------------------------------------------------------------------
 // UI: legend, layers, views, picking, info card
@@ -2163,12 +2286,17 @@ function tableChecks(rows) {
   for (const [what, when] of rows) { const tr = el('tr'); const ti = el('td', 'i'); ti.append(chipFor(when)); tr.append(el('td', null, what), ti); tb.append(tr); }
   t.append(tb); return t;
 }
+function tableQty(rows) {
+  const t = el('table', 't3'), tb = el('tbody');
+  for (const [part, what, qty] of rows) { const tr = el('tr'); const td = el('td'); td.append(el('div', null, part), el('div', 'sub', what)); tr.append(td, el('td', 'q', qty)); tb.append(tr); }
+  t.append(tb); return t;
+}
 function list(items, tag = 'ul') { const u = el(tag); for (const i of items) u.append(el('li', null, i)); return u; }
 const TABS = [
   ['over', 'Обзор', (st) => true],
-  ['design', 'Конструкция', (st) => st.man && ((st.man.design || []).length || (st.man.cycle || []).length)],
+  ['design', 'Конструкция', (st) => st.man && ((st.man.design || []).length || (st.man.cycle || []).length || (st.man.brg || []).length)],
   ['wear', 'Износ', (st) => st.man && (st.man.wear || []).length],
-  ['service', 'Смазка и ТО', (st) => st.man && ((st.man.lube || []).length || (st.man.checks || []).length)],
+  ['service', 'Смазка и ТО', (st) => st.man && ((st.man.lube || []).length || (st.man.checks || []).length || (st.man.oil || []).length)],
 ];
 function renderTab(id) {
   const st = infoState, m = st.man;
@@ -2179,13 +2307,17 @@ function renderTab(id) {
     iBody.append(list(st.facts));
     if (m && m.spec && m.spec.length) { iBody.append(el('h4', null, 'Технические данные по мануалу'), tableKV(m.spec)); }
   } else if (id === 'design') {
-    if (m.design && m.design.length) iBody.append(list(m.design));
+    if (m.brg && m.brg.length) { iBody.append(el('h4', null, 'Подшипники'), tableQty(m.brg)); if (m.brgNote) iBody.append(el('p', 'note', m.brgNote)); }
+    if (m.design && m.design.length) iBody.append(el('h4', null, 'Устройство'), list(m.design));
     if (m.cycle && m.cycle.length) iBody.append(el('h4', null, 'Цикл работы'), list(m.cycle, 'ol'));
+    if (!(m.brg && m.brg.length)) iBody.append(el('p', 'note', 'Количество подшипников в мануале этого оборудования не указано — перечень в документе 527-P-018 «Mill Bearing List».'));
   } else if (id === 'wear') {
     iBody.append(el('p', 'lead', 'Быстроизнашивающиеся и сменные детали — по разделу «Frequent checks» и описанию узлов в мануале.'), tableWear(m.wear));
     if (m.wear.some((w) => /по осмотру/.test(w[2]))) iBody.append(el('p', 'note', '«По осмотру» — мануал называет деталь, но периодичность контроля не задаёт.'));
   } else if (id === 'service') {
+    if (m.oil && m.oil.length) { iBody.append(el('h4', null, 'Объёмы ГСМ'), tableQty(m.oil)); if (m.oilNote) iBody.append(el('p', 'note', m.oilNote)); }
     if (m.lube && m.lube.length) iBody.append(el('h4', null, 'Смазка'), tableKV(m.lube));
+    if (!(m.oil && m.oil.length) && m.lube && m.lube.length) iBody.append(el('p', 'note', 'Заправочные объёмы в мануале этого оборудования не указаны — см. 527-U-009 «Oil Lubrication Selection Chart».'));
     if (m.checks && m.checks.length) iBody.append(el('h4', null, 'Регулярные проверки'), tableChecks(m.checks));
     if (m.notes && m.notes.length) for (const n of m.notes) iBody.append(el('p', 'note', n));
   }
