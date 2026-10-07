@@ -1,4 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Арматурный цех 527</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +45,7 @@
 }
 html, body { height: 100%; }
 [hidden] { display: none !important; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 13px; overflow: hidden; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 13px; overflow: hidden; }
 #app { position: fixed; inset: 0; }
 #viewport { position: absolute; inset: 0; }
 #viewport canvas { display: block; width: 100%; height: 100%; touch-action: none; }
@@ -92,12 +97,43 @@ details summary { cursor: pointer; font-family: var(--f-display); font-weight: 6
 .lg-name small { display: block; color: var(--muted); font-size: 11px; }
 
 /* Selection card */
-#info { left: 292px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: min(420px, calc(100% - 640px)); min-width: 300px; padding: 14px 16px; display: grid; gap: 8px; }
-#info .top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+#info { left: 292px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: min(520px, calc(100% - 640px)); min-width: 340px; max-height: calc(100% - 96px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); padding: 0; display: flex; flex-direction: column; }
+#info .top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; padding: 14px 16px 10px; }
+.itabs { display: flex; gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; flex: none; }
+.itabs[hidden] { display: none !important; }
+.itab { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 7px 8px 7px; font-family: var(--f-display); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.itab:hover { color: var(--ink); }
+.itab.on { color: var(--ink); border-bottom-color: var(--accent); }
+.itab .n { font-family: var(--f-mono); font-weight: 400; font-size: 10.5px; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+.itab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ibody { padding: 12px 16px 12px; overflow-y: auto; overscroll-behavior: contain; display: grid; gap: 10px; align-content: start; min-height: 0; }
+.ibody h4 { margin: 4px 0 -2px; font-family: var(--f-display); font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ibody ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; line-height: 1.38; }
+.ibody p.note { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.ibody p.lead { margin: 0; line-height: 1.42; }
+table.t2, table.t3 { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.36; }
+table.t2 th, table.t3 th { text-align: left; font-weight: 500; color: var(--muted); padding: 5px 10px 5px 0; vertical-align: top; }
+table.t2 th { width: 36%; }
+table.t2 td, table.t3 td { padding: 5px 0; vertical-align: top; white-space: pre-line; font-variant-numeric: tabular-nums; }
+table.t3 .sub { color: var(--muted); font-size: 11.5px; margin-top: 1px; }
+table.t3 td.i { text-align: right; padding-left: 8px; width: 1%; }
+table.t2 tr + tr > *, table.t3 tr + tr > * { border-top: 1px solid var(--line); }
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 10.5px; line-height: 1.5; padding: 0 6px; border-radius: 3px; background: var(--chip); border: 1px solid var(--line); white-space: nowrap; color: var(--ink); }
+.chip.hi { background: var(--accent-soft); border-color: var(--accent); }
+.chip.md { border-color: var(--steel); color: var(--steel); background: transparent; }
+.chip.lo { color: var(--muted); background: transparent; }
+.ifoot { padding: 9px 16px 12px; border-top: 1px solid var(--line); display: grid; gap: 3px; flex: none; }
+.ifoot .man { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.ifoot .man b { color: var(--ink); font-weight: 500; }
+table.tq { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+table.tq th, table.tq td { padding: 3px 4px; text-align: right; }
+table.tq th { color: var(--muted); font-weight: 500; }
+table.tq th:first-child, table.tq td:first-child { text-align: left; color: var(--steel); }
+table.tq tbody tr:nth-child(odd) { background: var(--chip); }
 #info .badge { font-family: var(--f-mono); font-size: 12px; font-weight: 500; background: var(--accent); color: var(--accent-ink); border-radius: 3px; padding: 2px 6px; flex: none; }
 #info h3 { font-family: var(--f-display); font-size: 17px; font-weight: 700; margin: 0; line-height: 1.15; text-wrap: balance; }
 #info .en { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
-#info ul { margin: 0; padding-left: 16px; display: grid; gap: 3px; line-height: 1.38; }
+#info ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; line-height: 1.38; }
 #info .dwg { font-family: var(--f-mono); font-size: 11px; color: var(--steel); line-height: 1.4; word-break: break-word; }
 .icon-btn { background: transparent; border: 0; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; padding: 0 2px; }
 .icon-btn:hover { color: var(--ink); }
@@ -121,7 +157,7 @@ details summary { cursor: pointer; font-family: var(--f-display); font-weight: 6
 @media (max-width: 860px) {
   #left, #right { width: auto; left: 8px; right: 8px; top: auto; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); max-height: 58%; }
   #left:not(.open), #right:not(.open) { display: none; }
-  #info { left: 8px; right: 8px; width: auto; min-width: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  #info { left: 8px; right: 8px; width: auto; min-width: 0; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); max-height: 64%; }
   #hud { display: none; }
   .mob { display: flex; z-index: 2; position: absolute; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
   .mob .btn { flex: 1; padding: 9px 6px; background: var(--panel-solid); }
@@ -131,7 +167,8 @@ details summary { cursor: pointer; font-family: var(--f-display); font-weight: 6
 .mtitle b { font-family: var(--f-display); font-size: 15px; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
-
+</head>
+<body>
 <div id="app">
   <div id="viewport"></div>
   <div id="labels"></div>
@@ -188,10 +225,37 @@ details summary { cursor: pointer; font-family: var(--f-display); font-weight: 6
       </div>
       <div class="sec">
         <details>
+          <summary>Моменты затяжки болтов</summary>
+          <div class="src">
+            <div>Н·м по документу PBL-10sh01, коэффициент трения 0,14. На этот документ ссылаются все мануалы оборудования.</div>
+            <table class="tq">
+              <thead><tr><th>Резьба</th><th>5.6</th><th>8.8</th><th>10.9</th><th>12.9</th></tr></thead>
+              <tbody>
+                <tr><td>M8</td><td>11</td><td>26</td><td>36</td><td>43</td></tr>
+                <tr><td>M10</td><td>22</td><td>51</td><td>72</td><td>87</td></tr>
+                <tr><td>M12</td><td>39</td><td>89</td><td>125</td><td>150</td></tr>
+                <tr><td>M14</td><td>62</td><td>141</td><td>198</td><td>240</td></tr>
+                <tr><td>M16</td><td>95</td><td>215</td><td>305</td><td>365</td></tr>
+                <tr><td>M18</td><td>130</td><td>295</td><td>420</td><td>500</td></tr>
+                <tr><td>M20</td><td>184</td><td>420</td><td>590</td><td>710</td></tr>
+                <tr><td>M24</td><td>315</td><td>725</td><td>1 020</td><td>1 220</td></tr>
+                <tr><td>M30</td><td>635</td><td>1 450</td><td>2 050</td><td>2 450</td></tr>
+                <tr><td>M36</td><td>1 111</td><td>2 530</td><td>3 560</td><td>4 280</td></tr>
+                <tr><td>M42</td><td>1 519</td><td>2 744</td><td>3 826</td><td>4 606</td></tr>
+                <tr><td>M48</td><td>2 254</td><td>3 920</td><td>5 592</td><td>6 664</td></tr>
+              </tbody>
+            </table>
+            <div>Размеры M56–M72 есть в документе, но в строках классов 10.9 и 12.9 для M64 явные опечатки — сверяйте с оригиналом.</div>
+          </div>
+        </details>
+      </div>
+      <div class="sec">
+        <details>
           <summary>О модели и источниках</summary>
           <div class="src">
             <div><b>Расстановка оборудования, оси, отметки:</b> план 527-101sh01 rev.8 (13.07.24), разрез по цеху на том же листе.</div>
             <div><b>Здание:</b> UZLE-EE-AZ-KRK-01-01-AR-001…023 (РП, 03.03.2025): размеры, отметки, окна, ворота, отделка. Разрез 1-1 (утв. 28.06.24). Схема колонн и связей (02.08.24).</div>
+            <div><b>Описания оборудования:</b> руководства по монтажу, эксплуатации и обслуживанию P-527 (Preet Brothers, 1-е изд., окт.–нояб. 2024) — клети, ножницы, петлеобразователи, TMT, тянущие ролики, холодильник, рольганги, редукторы, централизованная смазка 300 л/мин. В карточке объекта: вкладки «Конструкция», «Износ», «Смазка и ТО».</div>
             <div><b>Оборудование:</b> GA 527-231p1 (черновая клеть), 527-315p1 (клети C1–C2), CTE 1119-00 R8 (печь), P527-302sh01 r1 (краны), 527-804 (водное хозяйство), 527-800 (ECR).</div>
             <div>Оборудование показано упрощённо (уровень детализации LOD 200): положение и габариты в плане сняты с чертежа, высоты взяты из GA-чертежей или приняты типовыми. Вспомогательные здания показаны по плану 527-101; в РП UZLITI их состав и привязка отличаются.</div>
             <div class="mono">Координаты: X от оси 1, Z от оси А, м. 1 клетка подложки = чертёж 1:1.</div>
@@ -217,8 +281,9 @@ details summary { cursor: pointer; font-family: var(--f-display); font-weight: 6
       </div>
       <button class="icon-btn" id="i-close" aria-label="Закрыть">×</button>
     </div>
-    <ul id="i-facts"></ul>
-    <div class="dwg" id="i-dwg"></div>
+    <div class="itabs" id="i-tabs" role="tablist" aria-label="Разделы описания"></div>
+    <div class="ibody" id="i-body"></div>
+    <div class="ifoot"><div class="man" id="i-man"></div><div class="dwg" id="i-dwg"></div></div>
   </div>
 
   <div class="panel" id="hud">ЛКМ — вращать · ПКМ — сдвиг · колесо — масштаб · клик по объекту — описание · <b id="hud-coord">X —, Z —</b></div>
@@ -395,6 +460,7 @@ class Batch {
 }
 // box with base at y0, centred on (cx, cz)
 function box(b, mat, sx, sy, sz, cx, y0, cz, ry = 0) {
+  sx = Math.abs(sx); sy = Math.abs(sy); sz = Math.abs(sz);
   const g = new THREE.BoxGeometry(sx, sy, sz);
   if (ry) g.rotateY(ry);
   g.translate(cx, y0 + sy / 2, cz);
@@ -405,7 +471,7 @@ function boxMM(b, mat, x0, y0, z0, x1, y1, z1) {
   return box(b, mat, Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, Math.min(y0, y1), (z0 + z1) / 2);
 }
 function cyl(b, mat, r, len, axis, cx, cy, cz, seg = 14, rTop) {
-  const g = new THREE.CylinderGeometry(rTop ?? r, r, len, seg);
+  const g = new THREE.CylinderGeometry(rTop ?? r, r, Math.abs(len), seg);
   if (axis === 'x') g.rotateZ(Math.PI / 2); else if (axis === 'z') g.rotateX(Math.PI / 2);
   g.translate(cx, cy, cz);
   return b.add(g, mat);
@@ -880,24 +946,24 @@ make('furnace', 3, {
 
 make('grate', 1, { facts: ['Приём заготовок с участка складирования и подача на загрузочный рольганг', 'Гидропривод, гидростанция поз. 47 рядом'], dwg: '527-201p1sh01 r1 · фундамент 527-200sh01/02 (06.07.24)' }, (b) => {
   const z0 = Z(-722300), z1 = Z(-728200);
-  for (let i = 0; i < 6; i++) { const x = X(2055700) + i * 1.12; box(b, M.tableFrame, 0.25, 0.85, z0 - z1, x, 0, (z0 + z1) / 2); box(b, M.steelDark, 0.12, 0.1, z0 - z1, x, 0.85, (z0 + z1) / 2); }
-  box(b, M.steelDark, 6.2, 0.3, 0.3, X(2058500), 0.2, z0 - 0.4);
-  box(b, M.steelDark, 6.2, 0.3, 0.3, X(2058500), 0.2, z1 + 0.4);
-  for (let k = 0; k < 5; k++) box(b, M.billet, 6.0, 0.15, 0.15, X(2058500), 0.95, z0 - 1 - k * 0.9);
+  for (let i = 0; i < 6; i++) { const x = X(2056935) + i * 1.12; box(b, M.tableFrame, 0.25, 0.85, z0 - z1, x, 0, (z0 + z1) / 2); box(b, M.steelDark, 0.12, 0.1, z0 - z1, x, 0.85, (z0 + z1) / 2); }
+  box(b, M.steelDark, 6.2, 0.3, 0.3, X(2059735), 0.2, z0 - 0.4);
+  box(b, M.steelDark, 6.2, 0.3, 0.3, X(2059735), 0.2, z1 + 0.4);
+  for (let k = 0; k < 5; k++) box(b, M.billet, 6.0, 0.15, 0.15, X(2059735), 0.95, z0 - 1 - k * 0.9);
 }, equipRoot);
 make('chargeTable', 2, { facts: ['Подаёт заготовки к толкателям печи', 'Групповой привод роликов'], dwg: '527-201p1sh01 r1' }, (b) => {
-  rollerTable(b, X(2044500), X(2063800), Z(-728500), 1.3, { motorSide: 1, motorEvery: 3, pitch: 1.2 });
+  rollerTable(b, X(2044500), X(2063800), Z(-730218), 0.78, { motorSide: 1, motorEvery: 6, pitch: 19.3 / 17, r: 0.122 });
 }, equipRoot);
 make('pullout', 4, { facts: ['Вытягивает заготовку из бокового окна выдачи печи', 'Двигатель 37 кВт, 1440 об/мин'], dwg: '527-205p1sh01' }, (b) => {
   boxMM(b, M.machine, X(2043005), 0, Z(-707600), X(2044873), 1.7, Z(-709000));
   box(b, M.motor, 0.6, 0.6, 0.9, X(2043900), 0.9, Z(-706300));
 }, equipRoot);
 make('dischTable', 5, { facts: ['Рольганг вдоль бокового окна выдачи (ось Z ≈ −34,5 м)'], dwg: '527-205p1sh01' }, (b) => {
-  rollerTable(b, X(2033000), X(2043000), Z(-708300), 1.4, { motorSide: 1, pitch: 1.0 });
+  rollerTable(b, X(2033000), X(2043000), Z(-708300), 0.78, { motorSide: 1, pitch: 10 / 7, r: 0.122 });
 }, equipRoot);
 make('chainHot', 6, { facts: ['Три цепи: передаёт горячую заготовку с рольганга выдачи на рабочий рольганг стана', 'Карман отбраковки холодных заготовок у оси В'], dwg: '527-205p1sh01' }, (b) => {
   const zA = Z(-709800), zB = Z(-697600);
-  for (const xw of [2036600, 2038520, 2040400]) { box(b, M.tableFrame, 0.3, 0.8, zA - zB, X(xw), 0, (zA + zB) / 2); box(b, M.steelDark, 0.16, 0.1, zA - zB, X(xw), 0.8, (zA + zB) / 2); }
+  for (const xw of [2037361, 2039361, 2041361]) { box(b, M.tableFrame, 0.3, 0.8, zA - zB, X(xw), 0, (zA + zB) / 2); box(b, M.steelDark, 0.16, 0.1, zA - zB, X(xw), 0.8, (zA + zB) / 2); }
   cyl(b, M.steelDark, 0.1, 5.0, 'x', X(2038500), 0.45, zB + 1.0, 10);
   box(b, M.motor, 0.6, 0.6, 0.9, X(2041300), 0.2, zB + 1.0);
   boxMM(b, M.tableFrame, X(2035500), 0, zB + 2.4, X(2041000), 0.5, zB + 0.2);
@@ -907,8 +973,8 @@ make('chainHot', 6, { facts: ['Три цепи: передаёт горячую 
 // ROUGHING GROUP (527-206p1, 527-231p1, 527-209p1)
 // ---------------------------------------------------------------------------
 const RT_Z = Z(-702070);
-make('workExt', 7, { facts: ['Принимает заготовку с цепного перекладывателя'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2034000), X(2041500), RT_Z, 2.0, { motorSide: -1, motorEvery: 2, guides: true }), equipRoot);
-make('workTable', 8, { facts: ['Рабочий рольганг перед черновой клетью; реверсивный', 'Шаг роликов 1000 мм'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2041500), X(2062100), RT_Z, 2.0, { motorSide: -1, motorEvery: 2, guides: true }), equipRoot);
+make('workExt', 7, { facts: ['Принимает заготовку с цепного перекладывателя'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2034000), X(2041500), RT_Z, 1.58, { motorSide: -1, motorEvery: 2, guides: true, pitch: 7.5 / 6, r: 0.122 }), equipRoot);
+make('workTable', 8, { facts: ['Рабочий рольганг перед черновой клетью', '21 ролик Ø244 × 1500 мм'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2041500), X(2062100), RT_Z, 1.58, { motorSide: -1, motorEvery: 5, guides: true, pitch: 20.6 / 21, r: 0.122 }), equipRoot);
 make('rough', 9, {
   facts: ['Валки Ø680…590 × 1600 мм, подшипники SRB 24072', 'Привод: AC 1119 кВт, 739 об/мин; маховик 7 т', 'Редуктор 1360 CRS, i = 12,258; шестерённая клеть трио 610 CRS', 'Ось среднего валка +1,345'],
   dwg: '527-231p1sh01 r1 (06.06.24) · фундамент 527-300sh01/02', ly: 3.9,
@@ -937,8 +1003,8 @@ make('yTable', 10, { facts: ['Распределяет раскат по кал�
   rollerTable(b, X(2064917), X(2068320), Z(-702090), 3.4, { motorSide: -1, pitch: 0.55, r: 0.15 });
   box(b, M.machineDark, 0.6, 1.8, 0.6, X(2066600), 0, Z(-704000));
 }, equipRoot);
-make('yExt', 11, { facts: ['Удлинитель Y-рольганга для обратных проходов'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068129), X(2087805), Z(-701550), 2.3, { motorSide: -1, motorEvery: 2 }), equipRoot);
-make('approach', 12, { facts: ['Подаёт раскат от черновой клети к клети C1', 'Длина ≈ 38 м'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068316), X(2106100), Z(-703470), 1.4, { motorSide: 1, motorEvery: 2, y: 0.92 }), equipRoot);
+make('yExt', 11, { facts: ['Удлинитель Y-рольганга для обратных проходов'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068129), X(2087805), Z(-701550), 1.18, { motorSide: -1, motorEvery: 5, pitch: 19.676 / 20, r: 0.122 }), equipRoot);
+make('approach', 12, { facts: ['Подаёт раскат от черновой клети к клети C1', 'Длина ≈ 38 м'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068316), X(2106100), Z(-703470), 0.28, { motorSide: 1, motorEvery: 9, y: 0.92, pitch: 37.784 / 26, r: 0.0885 }), equipRoot);
 
 // ---------------------------------------------------------------------------
 // INTERMEDIATE + FINISHING STANDS C1–C16 (527-315…319p1)
@@ -1013,7 +1079,7 @@ const unit = (key, no, info, xa, xb, ya, yb, h, motor = true) => make(key, no, i
   if (motor) { const zm = Z(yb) + 0.6; motorZ(b, (x0 + x1) / 2, 1.1, zm, 0.34, 1.1); box(b, M.gear, Math.min(1.2, x1 - x0), 1.3, 0.8, (x0 + x1) / 2, 0.15, (LINE_Z - 0.5 + zm + 0.55) / 2); }
 }, equipRoot);
 unit('pinch21', 21, { facts: ['Консольные тянущие ролики после зоны охлаждения'], dwg: '527-286p2sh01 r1' }, 2176429, 2177627, -703064, -700343, 1.6);
-unit('shear22', 22, { facts: ['Непрерывная резка с сервоприводом (426,5 CRS)'], dwg: '527-321p1sh01 r1' }, 2177711, 2181369, -703196, -700762, 1.9);
+unit('shear22', 22, { facts: ['Непрерывно вращающиеся ножи режут готовый пруток на длину холодильника', 'Момент реза задают диверторы с серводвигателем'], dwg: '527-321p1sh01 r1' }, 2177711, 2181369, -703196, -700762, 1.9);
 make('shear23', 23, { facts: ['Летучие ножницы кривошипного типа 1100 CRS: порезка на мерные длины холодильника'], dwg: '527-321p2sh01 r1' }, (b) => {
   const x0 = X(2181396), x1 = X(2183888), cx = (x0 + x1) / 2;
   box(b, M.plate, x1 - x0 + 0.3, 0.2, 2.2, cx, 0, LINE_Z - 0.6);
@@ -1026,7 +1092,7 @@ make('funnel', 24, { facts: ['Направляющий жёлоб от лету�
   box(b, M.steelDark, x1 - x0, 0.22, 0.36, (x0 + x1) / 2, PASS - 0.15, LINE_Z);
   for (let x = x0 + 0.4; x < x1; x += 1.3) box(b, M.tableFrame, 0.14, PASS - 0.15, 0.6, x, 0, LINE_Z);
 }, equipRoot);
-unit('pinch25', 25, { facts: ['Двухскоростные тормозные ролики заднего конца раската'], dwg: '527-296p1sh01 r1' }, 2194354, 2196127, -703120, -700007, 1.7);
+unit('pinch25', 25, { facts: ['Двухскоростные тормозные ролики: тормозят пруток, чтобы он лёг на холодильник в своё место', 'Две линии роликов работают поочерёдно'], dwg: '527-296p1sh01 r1' }, 2194354, 2196127, -703120, -700007, 1.7);
 unit('pinch26', 26, { facts: ['Пружинные тянущие ролики 300 CRS перед холодильником'], dwg: '527-457p1sh01 r0' }, 2196331, 2197172, -703428, -701474, 1.5, false);
 
 // ---------------------------------------------------------------------------
@@ -1050,8 +1116,8 @@ make('coolbed', 28, { facts: ['Реечный холодильник 66 м, ша
   const mats = [M.hot, M.hot, M.warm, M.warm, M.dull, M.dull, M.cold, M.cold, M.cold, M.cold];
   for (let i = 0; i < 10; i++) box(b, mats[i], x1 - x0 - 3, 0.032, 0.032, cx, 1.11, zIn - 0.5 - i * (len - 1) / 9);
 }, equipRoot);
-make('runout', 29, { facts: ['Отводящий рольганг вдоль холодильника, передаёт пакет к ножницам холодной резки'], dwg: '527-600p1sh01' }, (b) => rollerTable(b, CB.x0 - 0.5, CB.x1, Z(-712100), 1.3, { motorSide: 1, motorEvery: 2 }), equipRoot);
-make('coldshear', 30, { facts: ['Усилие 300 т, гидравлический привод', 'Режет пакет арматуры на товарные длины'], dwg: '527-251p1sh01 r0 (02.05.24)' }, (b) => {
+make('runout', 29, { facts: ['Отводящий рольганг вдоль холодильника, передаёт пакет к ножницам холодной резки'], dwg: '527-600p1sh01' }, (b) => rollerTable(b, CB.x0 - 0.5, CB.x1, Z(-712100), 0.83, { motorSide: 1, pitch: (CB.x1 - CB.x0 + 0.5) / 55 }), equipRoot);
+make('coldshear', 30, { facts: ['Гидравлические, номинал 300 т, расчётное усилие реза 250 т', 'Режут слой прутков на мерные длины 12 м'], dwg: '527-251p1sh01 r0 (02.05.24)' }, (b) => {
   const x0 = X(2195288), x1 = X(2198288), zA = Z(-710905), zB = Z(-716080), cx = (x0 + x1) / 2;
   box(b, M.plate, x1 - x0, 0.25, zB - zA, cx, 0, (zA + zB) / 2);
   for (const s of [-1, 1]) box(b, M.machine, 0.55, 3.2, 1.6, cx + s * 1.0, 0.25, Z(-711900));
@@ -1060,25 +1126,25 @@ make('coldshear', 30, { facts: ['Усилие 300 т, гидравлически
   boxMM(b, M.gear, x0 + 0.2, 0.25, Z(-713300), x1 - 0.2, 1.6, Z(-715800));
 }, equipRoot);
 make('afterShear', 31, { facts: ['Рольганг после ножниц холодной резки с убирающимися упорами (поз. 32)'], dwg: '527-252p1sh01' }, (b) => {
-  rollerTable(b, X(2166000), X(2194800), Z(-711850), 1.3, { motorSide: -1 });
+  rollerTable(b, X(2166000), X(2194800), Z(-711850), 0.83, { motorSide: -1, pitch: 28.8 / 24, r: 0.09 });
 }, equipRoot);
 make('stoppers', 32, { title: 'Убирающиеся упоры — 2 шт.', facts: ['Входят в состав рольганга поз. 31; показаны условно'], dwg: '527-252p1sh01' }, (b) => {
   for (const xw of [2168000, 2180600]) { box(b, M.guard, 0.3, 1.25, 1.5, X(xw), 0, Z(-711850)); }
 }, equipRoot);
-make('chain33', 33, { facts: ['10 цепей с шагом ≈ 1,2 м, три яруса: набор, формирование и выдача пакета', 'Длина перекладки ≈ 10,8 м (от рольганга поз. 31 к поз. 35)'], dwg: '527-255p1sh01/sh02' }, (b) => {
+make('chain33', 33, { facts: ['Три цепных шлеппера подряд, по 10 цепей; каждый следующий на 20 % быстрее — прутки расходятся в ровный слой', 'Общая длина перекладки ≈ 10,2 м (3 + 3,7 + 3,53 м)'], dwg: '527-255p1sh01/sh02' }, (b) => {
   const zA = Z(-712000), zB = Z(-722800);
   for (let i = 0; i < 10; i++) { const x = X(2168970) + i * 1.205; box(b, M.tableFrame, 0.26, 0.7, zA - zB, x, 0, (zA + zB) / 2); box(b, M.steelDark, 0.12, 0.08, zA - zB, x, 0.7, (zA + zB) / 2); }
   for (const yw of [-713200, -717300, -720800]) { cyl(b, M.steelDark, 0.1, 12.5, 'x', X(2174400), 0.4, Z(yw), 10); box(b, M.motor, 0.8, 0.7, 0.9, X(2180700), 0.1, Z(yw)); }
   for (let k = 0; k < 4; k++) box(b, M.rebar, 11.5, 0.05, 0.05, X(2174400), 0.8, Z(-714500) - k * 2.2);
 }, equipRoot);
-make('sarm', 34, { facts: ['S-образные рычаги переноса пакета; в составе перекладывателя поз. 33 (показаны условно)'], dwg: '527-255p1sh02' }, (b) => {
+make('sarm', 34, { facts: ['S-образный рычаг собирает пучок и опускает его на рольганг к вязальным машинам (показан условно)'], dwg: '527-255p1sh02' }, (b) => {
   for (let i = 0; i < 10; i += 3) { const x = X(2168970) + i * 1.205 + 0.3; beam(b, M.guard, x, 0.5, Z(-721600), x, 1.1, Z(-722600), 0.12, 0.12); }
 }, equipRoot);
-make('afterChain', 35, { facts: ['Рольганг после перекладывателя, подаёт пакеты на вязку'], dwg: '527-255p1sh01' }, (b) => rollerTable(b, X(2166000), X(2181000), Z(-723150), 1.3, { motorSide: 1 }), equipRoot);
-make('tying', 36, { facts: ['Полуавтоматическая обвязка пакетов проволокой, 2 машины'], dwg: '527-265p1sh01' }, (b) => {
+make('afterChain', 35, { facts: ['Рольганг после перекладывателя, подаёт пакеты на вязку'], dwg: '527-255p1sh01' }, (b) => rollerTable(b, X(2166000), X(2181000), Z(-723150), 0.38, { motorSide: 1, pitch: 1.5, r: 0.109 }), equipRoot);
+make('tying', 36, { facts: ['Полуавтоматическая обвязка пучков прутком Ø6 × 1100 мм, 2 машины', 'Цикл вязки 10–15 с'], dwg: '527-265p1sh01' }, (b) => {
   for (const xw of [2183400, 2185600]) { const x = X(xw), z = Z(-723150); box(b, M.machine, 1.0, 2.4, 0.4, x, 0, z - 1.0); box(b, M.machine, 1.0, 0.45, 2.4, x, 2.0, z); box(b, M.machineDark, 0.6, 0.9, 0.7, x, 0, z + 1.2); }
 }, equipRoot);
-make('afterTying', 37, { facts: ['Рольганг после вязальных машин'], dwg: '527-265p1sh01' }, (b) => rollerTable(b, X(2181200), X(2201000), Z(-723150), 1.3, { motorSide: 1 }), equipRoot);
+make('afterTying', 37, { facts: ['Рольганг после вязальных машин'], dwg: '527-265p1sh01' }, (b) => rollerTable(b, X(2181200), X(2201000), Z(-723150), 0.38, { motorSide: 1, pitch: 19.8 / 13, r: 0.109 }), equipRoot);
 make('cradles', 38, { facts: ['Сбрасыватель и 5 карманов для готовых пакетов'], dwg: '527-265p1sh01' }, (b) => {
   for (const xw of [2190300, 2192800, 2195300, 2197600, 2200000]) { const x = X(xw); beam(b, M.steel, x, 0.9, Z(-723800), x, 0.35, Z(-725800), 0.18, 0.2); beam(b, M.steel, x, 0.35, Z(-725800), x, 0.9, Z(-727000), 0.18, 0.2); box(b, M.tableFrame, 0.25, 0.35, 0.25, x, 0, Z(-725800)); }
   cyl(b, M.rebar, 0.26, 11, 'x', X(2195100), 0.62, Z(-725700), 12);
@@ -1088,7 +1154,7 @@ make('cradles', 38, { facts: ['Сбрасыватель и 5 карманов д
 // MILL SERVICES: lube, hydraulics, roll shop, pulpit, gas, weigh bridge, stores
 // ---------------------------------------------------------------------------
 const LUBE = [[2059457, -695738], [2114544, -698061], [2130566, -693846], [2137962, -697615], [2164966, -698052]];
-LUBE.forEach(([xw, yw], i) => make('lube' + (i + 1), 44, { title: `Станция смазки №${i + 1}`, en: 'Lubrication System', facts: ['Масляная станция в приямке 3 × 3 м'], dwg: '527-U-009 (выбор системы смазки)' }, (b) => {
+LUBE.forEach(([xw, yw], i) => make('lube' + (i + 1), 44, { title: `Станция смазки №${i + 1}`, en: 'Lubrication System', facts: ['Централизованная жидкая смазка 300 л/мин редукторов и шестерённых клетей стана', 'Станция в приямке 3 × 3 м'], dwg: '527-U-009 (выбор системы смазки)' }, (b) => {
   const x = X(xw), z = Z(yw);
   box(b, M.pit, 3.0, 0.02, 3.0, x, 0, z); box(b, M.guard, 3.1, 1.0, 0.05, x, 0, z + 1.53); box(b, M.guard, 3.1, 1.0, 0.05, x, 0, z - 1.53);
   box(b, M.gear, 2.3, 0.9, 1.6, x, 0, z); box(b, M.motor, 0.4, 0.4, 0.6, x - 0.6, 0.9, z); box(b, M.motor, 0.4, 0.4, 0.6, x + 0.6, 0.9, z);
@@ -1134,7 +1200,7 @@ make('billets', null, { title: 'Склад заготовок 150×150', en: 'Bi
   const cols = [[2068600, 2074600], [2075000, 2081000], [2081600, 2087400]];
   const rows = [[-717400, -722400], [-724800, -730800]];
   for (const [xa, xb] of cols) for (const [ya, yb] of rows) {
-    const x0 = X(xa), x1 = X(xb), zA = Z(ya), zB = Z(yb);
+    const x0 = X(xa), x1 = X(xb), zA = Math.max(Z(ya), Z(yb)), zB = Math.min(Z(ya), Z(yb));
     for (let layer = 0; layer < 7; layer++) {
       const y = 0.08 + layer * 0.16;
       if (layer % 2 === 0) { for (let z = zB + 0.2; z < zA; z += 0.42) box(b, M.billet, x1 - x0, 0.15, 0.15, (x0 + x1) / 2, y, z); }
@@ -1146,7 +1212,7 @@ make('tmtstore', null, { title: 'Склад готовой арматуры', en
   const cols = [[2209200, 2215250], [2216075, 2222125], [2223100, 2229165]];
   const rows = [[-720425, -722350], [-722790, -724825], [-725265, -727300], [-727740, -729775]];
   for (const [xa, xb] of cols) for (const [ya, yb] of rows) {
-    const x0 = X(xa), x1 = X(xb), zA = Z(ya), zB = Z(yb);
+    const x0 = X(xa), x1 = X(xb), zA = Math.max(Z(ya), Z(yb)), zB = Math.min(Z(ya), Z(yb));
     for (const x of [x0 + 0.5, x1 - 0.5]) for (const z of [zA, zB]) box(b, M.steel, 0.15, 1.6, 0.15, x, 0, z);
     for (let k = 0; k < 3; k++) for (let j = 0; j < 3; j++) cyl(b, M.rebar, 0.27, x1 - x0 - 0.2, 'x', (x0 + x1) / 2, 0.3 + k * 0.5, zB + 0.35 + j * ((zA - zB - 0.7) / 2), 10);
   }
@@ -1300,6 +1366,628 @@ function updateBar(t) {
 }
 
 // ---------------------------------------------------------------------------
+// EQUIPMENT DATA FROM O&M MANUALS (Preet Brothers, P-527, 1st edition 2024)
+// Each entry: src, spec [[param, value]], design [..], cycle [..],
+// wear [[part, what to check, interval]], lube [[point, lubricant]], checks [[check, interval]], notes [..]
+// ---------------------------------------------------------------------------
+const SH = 'каждую смену', SH2 = '2 раза в смену', WK = 'еженедельно', MO = 'ежемесячно', H2 = 'каждые 2 ч', H1 = 'каждый час';
+const OIL_CHANGE = '5000–6000 ч или раз в год';
+const OIL_NOTES = [
+  'Замена масла — каждые 5000–6000 ч работы или раз в год, что наступит раньше.',
+  'Второй залив — через 1–1,5 месяца после первого; слитое масло можно залить повторно после механической фильтрации.',
+  'Масла и смазки разных производителей не смешивать.',
+];
+const GREASE = ['Подшипники и втулки', 'Пластичная смазка EP2 или аналог, переносная станция; уровень в баке — еженедельно'];
+const BOLTS = ['Болтовые соединения', 'Затяжка моментом по PBL-10sh01', SH];
+const CENTRAL = 'Масло ISO VG 320 от централизованной системы 300 л/мин, давление на входе 1,5–1,8 бар';
+const DRIVE_CHECKS = [
+  ['Работа централизованной смазки', SH], ['Поток масла к подшипникам и зацеплениям', SH], ['Утечки масла', SH],
+  ['Посторонний шум', SH], ['Уровень масла в баке централизованной смазки', SH], ['Доливка масла в бак', WK],
+  ['Затяжка болтов', SH], ['Слив, очистка и заливка масла', OIL_CHANGE],
+];
+const MILL_CYCLE = ['Включить централизованную смазку.', 'Через 15 мин пустить главный двигатель.', 'Клеть работает непрерывно в одном направлении.'];
+const GEARBOX_DESIGN = 'Редуктор: сварной корпус после снятия напряжений; шестерни цементованные и шлифованные, 60 ± 2 HRC, 6-я степень точности по ISO 1328; подшипники качения; необслуживаемые механические уплотнения; зацепления и подшипники смазываются принудительно от централизованной системы.';
+const TABLE_CHECKS = [['Посторонний шум', SH], ['Натяжение цепей', SH], ['Натяжение ремней', SH], ['Уровень масла в редукторах и мотор-редукторах', WK], ['Доливка масла', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]];
+const TABLE_LUBE = [GREASE, ['Редукторы и мотор-редукторы', 'Масло ISO VG 320 или аналог']];
+const TABLE_WEAR = [['Ролики', 'Состояние бочки, вращение без заеданий', SH], ['Цепи и звёздочки', 'Натяжение (регулируется добавлением или удалением звена)', SH], ['Клиновые ремни', 'Натяжение (сдвигом двигателя на раме)', SH]];
+const SHEAR_WEAR = (extra = []) => [
+  ['Ножи верхний и нижний', 'Зазор между ножами, острота, совмещение', SH],
+  ['Крепление ножей и ножедержателей', 'Затяжка болтов и клиньев; зазор выставляется прокладками', SH],
+  ...extra,
+];
+const SHEAR_CHECKS = (extra = []) => [
+  ['Работа насоса смазки', SH], ['Поток масла к подшипникам', SH], ['Утечки масла', SH], ['Распыл масла на зацепление', SH],
+  ['Посторонний шум', SH], ['Уровень масла в ножницах', WK], ['Доливка масла', WK], ...extra, ['Слив, очистка и заливка масла', OIL_CHANGE],
+];
+
+// --- 2-high shiftable stands C1–C16
+const SCLS = {
+  460: { d: '510 → 450', bl: 800, brg: '24052 CCK30/W33 C3', bore: 260, rc: '0,30–0,39', du: '4,5–5,4', rca: '0,15–0,27', hm: 'BM5U-630P99AY/T99', cyl: 'Ø160/110 × 700 мм, 160 бар', card: 390,
+    src: '460mm 2HI Shiftable Mill Stand · 460mm 2HI Shiftable Mill C1 & C2' },
+  410: { d: '450 → 390', bl: 700, brg: '24048 CCK30/W33 C3', bore: 240, rc: '0,27–0,35', du: '4,0–4,85', rca: '0,14–0,24', hm: 'BM5U-400P99AY/T99', cyl: 'Ø160/110 × 600 мм, 160 бар', card: 350,
+    src: '410mm 2HI Shiftable Mill Stand · 410mm 2HI Shiftable Mill C3 & C4' },
+  360: { d: '410 → 350', bl: 600, brg: '24040 CCK30/W33 C3', bore: 200, rc: '0,22–0,29', du: '3,3–4,0', rca: '0,115–0,20', hm: 'BM5U-400P99AY/99', cyl: 'Ø125/90 × 500 мм, 160 бар', card: 315,
+    src: '360mm 2HI Shiftable Mill Stand · 360mm 2HI Shiftable Mill C5 & C6' },
+  310: { d: '350 → 290', bl: 600, brg: '24032 CCK30/W33 C3', bore: 160, rc: '0,20–0,26', du: '3,0–3,6', rca: '0,105–0,18', hm: 'BMP-315P1AII Y10/T10', cyl: 'Ø125/90 × 500 мм, 160 бар', card: 250,
+    src: '310mm 2HI Shiftable Mill Stand · 310mm 2HI Shiftable Mill C7, C8, C9 & C10' },
+  260: { d: '320 → 270', bl: 500, brg: '24030 CCK30/W33 C3', bore: 150, rc: '0,18–0,23', du: '2,65–3,2', rca: '0,095–0,16', hm: 'BMP-315 P1AII410/T10', cyl: 'Ø100/56 × 450 мм, 160 бар', card: 225,
+    src: '260mm 2HI Shiftable Mill Stand · 260mm 2HI Shiftable Mill C11–C16' },
+};
+const GEAR = { C1: [1240, '33,96'], C2: [1240, '33,96'], C3: [1240, '23,54'], C4: [1240, '23,54'], C5: [930, '17,2'], C6: [930, '12,8'], C7: [720, '7,46'], C8: [420, '5,21'],
+  C9: [380, '3,89'], C10: [380, '2,96'], C11: [320, '2,96'], C12: [260, '1,86'], C13: [260, '1,5'], C14: [260, '1,5'], C15: [260, '1,2'], C16: [260, '1,0'] };
+function standMan(cls, ids) {
+  const c = SCLS[cls];
+  const gear = ids.map((id) => `${id}: межосевое ${GEAR[id][0]} мм, i = ${GEAR[id][1]}`).join('\n');
+  return {
+    src: c.src,
+    spec: [
+      ['Тип', `Дуо (2-валковая), сдвижная, номинальный диаметр ${cls} мм`],
+      ['Валки', `Ø${c.d} мм (новый → минимальный), бочка ${c.bl} мм`],
+      ['Подшипники валков', `Сферические роликовые ${c.brg}, отверстие ${c.bore} мм`],
+      ['Нажимное устройство', `Червячный редуктор, винт с упорной резьбой, гидромотор ${c.hm}`],
+      ['Сдвижка клети', `Гидроцилиндр ${c.cyl}`],
+      ['Главный привод', 'Двигатель постоянного тока 300 кВт, 0–1000–2000 об/мин'],
+      [ids.length > 1 ? 'Редукторы-шестерённые клети' : 'Редуктор-шестерённая клеть', gear + `\nшестерённая клеть ${cls} мм`],
+      ['Карданные валы', `Фланец Ø${c.card} мм, угол до 15° (компенсация переточки валков)`],
+    ],
+    design: [
+      'Верхний валок подвешен на пружинных тягах; поднимается и опускается гайкой на тяге.',
+      'Зазор между валками задаёт нажимной винт: червяк от гидромотора вращает нажимную гайку с зубьями.',
+      'Нижний валок установлен в нижней части станины.',
+      'Клеть сдвижная. На прокатке её держит гидрозажим с тарельчатыми пружинами (усилие создают пружины), гидравликой зажим разжимается только на время сдвижки.',
+      'Осевая регулировка валков болтами и гайками — для совмещения калибров верхнего и нижнего валков.',
+      'Проводки крепятся на проводковых брусьях: вводная — стационарная или роликовая, выводная — стационарная или трубчатая кантующая (twister), под профиль раската.',
+      'Узел валка: лабиринт, V-образное уплотнение, внутренние и наружные крышки фиксирующей и плавающей опор, подушки приводной и неприводной стороны, подшипник на конусе с разрезной гайкой, контргайка со стопорной шпонкой. Подшипник сажают с нагревом индукционным нагревателем и подтягивают гайку по мере остывания.',
+      'Привод: двигатель → зубчатая муфта → редуктор, совмещённый с шестерённой клетью → два карданных вала → валки.',
+      GEARBOX_DESIGN,
+    ],
+    cycle: MILL_CYCLE,
+    wear: [
+      ['Валки', 'Износ калибров и совмещение калибров', SH2],
+      ['Вводные и выводные проводки', 'Износ', SH2],
+      ['Вводные и выводные проводки', 'Выверка и затяжка', SH2 + ' и по необходимости'],
+      ['Износные планки подушек', 'Зазор между подушкой и планкой', MO],
+      ['Нажимной винт и гайка', 'Люфт в резьбе', MO + ' / при ремонте'],
+      [`Подшипники ${c.brg}`, `Монтаж: радиальный зазор до посадки ${c.rc} мм, осевое смещение на конусе ${c.du} мм, зазор после посадки ${c.rca} мм`, 'при сборке узла валка'],
+      ['Уплотнения узла валка', 'V-образное кольцо и лабиринт — в составе узла валка', 'при сборке узла валка'],
+      BOLTS,
+    ],
+    lube: [['Подшипники и втулки клети', GREASE[1]], ['Редуктор-шестерённая клеть: зацепления и подшипники', CENTRAL]],
+    checks: DRIVE_CHECKS,
+    notes: OIL_NOTES,
+  };
+}
+
+const MAN = {};
+for (const [id, , cls] of [['C1', 0, 460], ['C2', 0, 460], ['C3', 0, 410], ['C4', 0, 410], ['C5', 0, 360], ['C6', 0, 360], ['C7', 0, 310], ['C8', 0, 310], ['C9', 0, 310], ['C10', 0, 310],
+  ['C11', 0, 260], ['C12', 0, 260], ['C13', 0, 260], ['C14', 0, 260], ['C15', 0, 260], ['C16', 0, 260]]) MAN['stand' + id] = standMan(cls, [id]);
+// group cards (legend click selects all stands of a size)
+const MAN_NO = {
+  13: standMan(460, ['C1', 'C2']), 15: standMan(410, ['C3', 'C4']), 16: standMan(360, ['C5', 'C6']),
+  17: standMan(310, ['C7', 'C8', 'C9', 'C10']), 19: standMan(260, ['C11', 'C12', 'C13', 'C14', 'C15', 'C16']),
+};
+
+MAN.rough = {
+  src: '610mm 3HI Roughing Mill Stand · 610mm 3HI Roughing Mill',
+  spec: [
+    ['Тип', 'Трио (3-валковая), номинальный диаметр 610 мм'],
+    ['Валки', 'Ø680 → 590 мм (новый → минимальный), бочка 1600 мм'],
+    ['Подшипники валков', 'Сферические роликовые 24072 CCK30/W33 C3, отверстие 360 мм'],
+    ['Нажимные устройства', 'Для верхнего и нижнего валков: червячный редуктор, винт с упорной резьбой, гидромотор BM5U-630P99AY/T99'],
+    ['Главный привод', 'Асинхронный двигатель 1119 кВт, 739 об/мин, 50 Гц'],
+    ['Скорость прокатки', '2,145 м/с на максимальном диаметре; вращение в одну сторону'],
+    ['Редуктор', '1360 CRS, i = 12,258'],
+    ['Шестерённая клеть', '610 CRS, трио'],
+    ['Шпиндели', 'Универсальные, угол до 8°'],
+    ['Муфты', 'Зубчатые: двигатель–маховик PGC 110, маховик–редуктор PGC 111, редуктор–шестерённая клеть PGC 116'],
+  ],
+  design: [
+    'Средний валок неподвижен — установлен по центру клети и удерживается линейными стойками на клиньях.',
+    'Верхний валок подвешен на пружинных тягах (подъём гайкой на тяге); зазор задаёт нажимной винт через червячную пару с гидромотором.',
+    'Нижний валок стоит на нажимном винте; поднимается и опускается червячной парой с гидромотором.',
+    'Крышка станины соединена со станиной жёсткими связями на клиньях.',
+    'Проводки только стационарные, под профиль входящего и выходящего раската; крепятся на проводковых брусьях. Калибры совмещаются осевой регулировкой болтами.',
+    'Раскат проходит несколько пропусков на высокой скорости — так он сохраняет температуру перед непрерывной группой.',
+    'Привод: двигатель → маховик → редуктор 1360 CRS → шестерённая клеть трио → три универсальных шпинделя. Шпиндели компенсируют разницу диаметров валков после переточки.',
+    'Узел валка: лабиринт, V-образное уплотнение, крышки фиксирующей и плавающей опор, подушки, подшипник на конусе с разрезной гайкой.',
+  ],
+  cycle: MILL_CYCLE,
+  wear: [
+    ['Валки', 'Износ калибров; совмещение калибров верхнего и нижнего валков со средним', SH2],
+    ['Проводки', 'Износ', SH2],
+    ['Проводки', 'Выверка и затяжка', SH2 + ' и по необходимости'],
+    ['Жёсткие связи крышки', 'Затяжка клиньев', SH],
+    ['Линейные стойки среднего валка', 'Затяжка клиньев и стяжных болтов', SH],
+    ['Износные планки подушек', 'Зазор между подушкой и планкой', MO],
+    ['Нажимные винты и гайки', 'Люфт в резьбе', MO + ' / при ремонте'],
+    ['Подшипники 24072 CCK30/W33 C3', 'Монтаж: радиальный зазор до посадки 0,40–0,52 мм, осевое смещение на конусе 6,2–7,6 мм, зазор после посадки 0,19–0,35 мм', 'при сборке узла валка'],
+    BOLTS,
+  ],
+  lube: [['Подшипники и втулки клети', GREASE[1]], ['Редуктор и шестерённая клеть', CENTRAL]],
+  checks: DRIVE_CHECKS,
+  notes: OIL_NOTES,
+};
+
+const CROP = (pos, rpm, v) => ({
+  src: '610 CRS Crop & Cobble Shear',
+  spec: [
+    ['Место установки', pos],
+    ['Главный привод', `Двигатель постоянного тока 175 кВт, 0–${rpm} об/мин`],
+    ['Межцентровое', '610 мм; передаточное отношение 3,73'],
+    ['Макс. линейная скорость ножей', `${v} м/с`],
+    ['Ножи', 'Профильные, ширина 140 мм, сталь H13 (1.2344), 51–53 HRC'],
+    ['Насос смазки', '1,1 кВт, 1440 об/мин, 16,8 л/мин'],
+  ],
+  design: [
+    'Ножницы синхронизированы со скоростью стана. Для обрезки концов работают в режиме «старт-стоп», при аварийной порезке вращаются непрерывно.',
+    'На входе — вводная проводка, направляет передний конец раската.',
+    'Узел уборки обрези на выходе: откидной жёлоб с пневмоцилиндром, склиз и короб обрези. В аварийном режиме жёлоб открывается и уводит порезанные куски в склиз.',
+    'Ножи закреплены в верхнем и нижнем ножедержателях болтами и клиньями; зазор между ножами выставляется прокладками.',
+  ],
+  cycle: [
+    'Обрезка концов: сигнал о наличии металла приходит от следующей клети; двигатель стартует с задержкой по скорости раската, чтобы отрезать 75–100 мм.',
+    'При резе переднего конца ножи разгоняются до скорости на 7–10 % выше скорости раската, при резе заднего — на 7–10 % ниже; после реза ножи возвращаются в положение парковки.',
+    'Аварийная порезка: по команде «cobble» с поста открывается жёлоб, ножницы на максимальной скорости режут раскат на куски, куски падают в короб.',
+  ],
+  wear: SHEAR_WEAR([
+    ['Муфта энкодера', 'Затяжка и люфт', WK],
+    ['Пневмоцилиндры дивертора и откидного жёлоба', 'Давление воздуха у клапана, работа', SH],
+  ]),
+  lube: [GREASE, ['Ножницы (зубчатые передачи и подшипники)', 'Масло ISO VG 320, автономная система с насосом']],
+  checks: SHEAR_CHECKS([['Затяжка болтов ножей и ножедержателей', SH], ['Муфта энкодера', WK]]),
+  notes: OIL_NOTES,
+});
+MAN.shear1 = CROP('Между клетями C2 и C3', 500, '4,27');
+MAN.shear2 = CROP('Между клетями C8 и C9', 900, '7,7');
+
+const LOOPER = {
+  src: 'Single Strand Vertical Looper with Snap Shear',
+  spec: [
+    ['Место установки', 'Между клетями C10–C11, C12–C13, C14–C15'],
+    ['Петля', 'Вверх, высота до 120 мм'],
+    ['Дивертор', 'Пневмоцилиндр Ø80/25, ход 175 мм'],
+    ['Отсекающие ножницы (snap shear)', 'Пневмоцилиндр Ø100/25, ход 130 мм'],
+  ],
+  design: [
+    'Состав: рама, вводной ролик, роликовый дивертор с пневмоцилиндром, болт регулировки высоты дивертора, отсекающие ножницы с пневмоцилиндром.',
+    'Петлеобразователь образует петлю между чистовыми клетями, чтобы раскат шёл без натяжения. Высоту петли измеряет сканер; по ней каскадно корректируется скорость предыдущей клети.',
+  ],
+  cycle: [
+    'Передний конец входит в следующую клеть; от ударной нагрузки её скорость падает, и позади образуется петля.',
+    'Дивертор поднимается и направляет петлю вверх.',
+    'Сканер следит за высотой: у верхней уставки скорость предыдущей клети увеличивается, у нижней — уменьшается.',
+    'Когда задний конец уходит из следующей клети, дивертор возвращается в исходное положение.',
+  ],
+  wear: [['Ролики (вводной, дивертора) и их подшипники', 'Смазка подшипников', SH], ['Пневмоцилиндры дивертора и ножниц', 'Давление воздуха у клапана, работа', SH], BOLTS],
+  lube: [GREASE],
+  checks: [['Смазка подшипников', SH], ['Посторонний шум', SH], ['Затяжка болтов', SH], ['Давление воздуха дивертора и ножниц у электроклапана', SH], ['Работа дивертора и ножниц', SH]],
+};
+MAN.looper1 = MAN.looper2 = MAN.looper3 = LOOPER;
+
+MAN.tmt = {
+  src: 'TMT – 3 Line',
+  spec: [
+    ['Число линий', '3, переключаются сдвигом тележки'],
+    ['Сопла', 'Ø22 — арматура Ø8, 10, 12; Ø36 — Ø16, 20, 25; Ø55 — Ø28, 32, 40'],
+    ['Сдвиг линий', 'Тележка на 4 рельсах, гидроцилиндр Ø63/45, ход 1020 мм, 160 бар'],
+    ['Процесс', 'Tempcore: закалка поверхности водой сразу после чистовой клети, самоотпуск теплом сердцевины'],
+    ['Прирост предела текучести', '150–230 МПа без легирования; типичный σт 415–550 МПа при удлинении 30–25 %'],
+    ['Рекомендуемая сталь', 'C 0,13–0,24 %, углеродный эквивалент < 0,45 %'],
+  ],
+  design: [
+    'Состав: три линии охлаждения, рельсы и тележка со сдвигающим гидроцилиндром, главный коллектор воды, охлаждающие сопла, водяные стрипперы, воздушный стриппер, тянущие ролики после TMT.',
+    'Размер сопла выбирают по готовому профилю; число сопел — по скорости прокатки и профилю.',
+    'Водяной стриппер на входе даёт стартовую струю; на выходе — снимает воду с проката. Воздушный стриппер сушит пруток.',
+    'Регулирование: грубо — числом работающих сопел (отключают первые по ходу), точно — расходом воды главным регулирующим клапаном.',
+    'Пирометры — основа контроля: на входе (температура конца прокатки) и в точке максимальной температуры самоотпуска. Отклонение на 50 °C на входе ≈ 8 % длины охлаждения.',
+    'Три стадии: закалка поверхностного слоя в мартенсит → самоотпуск мартенсита теплом сердцевины → превращение сердцевины в феррит и перлит на холодильнике.',
+  ],
+  wear: [
+    ['Охлаждающие сопла', 'Износ (ускоряется при несоосности сопел)', 'при каждой смене профиля'],
+    ['Охлаждающие сопла', 'Засорение', SH],
+    ['Охлаждающие сопла', 'Слив и прочистка', WK],
+    ['Прокладки сопел', 'Прогар при входе горячего прутка ≈ 1000 °C ведёт к утечкам', 'по осмотру'],
+    ['Стрипперы', 'Засорение: пруток переохлаждается, вода мешает фотодатчикам ролика и ножниц', 'по осмотру'],
+    ['Пирометры', 'Охлаждение, чистка линз, поверка по чёрному телу — иначе дрейф и брак', 'периодически'],
+  ],
+  lube: [],
+  checks: [
+    ['Давление и расход воды на входе TMT', H2], ['Давление воздуха на входе TMT', H2], ['Утечки воды в трубопроводе', H2],
+    ['Качество арматуры: передний конец, середина, задний конец', H1], ['Температура воды на входе и выходе', H1],
+    ['Засорение сопел', SH], ['Посторонний шум', SH], ['Слив и прочистка сопел', WK], ['Износ сопел', 'при каждой смене профиля'], ['Затяжка болтов', WK],
+  ],
+  notes: ['Ошибки, которые даёт мануал: слишком большое сопло для малого профиля (открытое мартенситное кольцо, волнистые прутки); вся длина охлаждения при малом расходе; засорение сопел или стрипперов; работа без пирометров и без тянущих роликов на выходе.'],
+};
+
+const PINCH_LUBE = [GREASE, ['Шестерённая клеть', 'Масло ISO VG 320, смазка разбрызгиванием']];
+const PINCH_CHECKS = [['Разбрызгивание масла на подшипники и зацепление', SH], ['Утечки масла из шестерённой клети', SH], ['Посторонний шум', SH], ['Зазор между валками', SH],
+  ['Выверка вводной и выводной проводок', SH], ['Уровень масла в шестерённой клети', WK], ['Затяжка болтов', SH], ['Доливка масла', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]];
+MAN.pinch21 = {
+  src: 'Single Strand Cantilever Pinch Roll',
+  spec: [
+    ['Главный привод', 'Двигатель постоянного тока 45 кВт, 0–1000–1800 об/мин'],
+    ['Межцентровое валков', '290–350 мм; шестерённая клеть 300 мм'],
+    ['Двухскоростной редуктор', '1:1 — 16,23–29,22 м/с; 3:1 — 5,4–9,74 м/с'],
+    ['Валки', 'Ø310 мм, ширина 80 мм, раскрытие 60 мм'],
+    ['Пневмоцилиндр прижима', 'Ø100/25, ход 90 мм'],
+    ['Кардан', 'Фланец Ø150, длина 400 мм'],
+  ],
+  design: [
+    'Консольные тянущие ролики; по мануалу ставятся до и после TMT. До TMT подают пруток в TMT, после TMT — в ножницы 426,5 CRS. На плане 527-101 — одна установка после TMT.',
+    'Состав: консольные валки, кардан, двухскоростной редуктор-шестерённая клеть, зубчатая полумуфта, двигатель, общая рама, вводная и выводная воронки.',
+  ],
+  cycle: ['Сигнал о металле — от датчика горячего металла (HMD) за чистовой клетью; ролики зажимают пруток с задержкой по скорости.', 'Ролики разжимаются, когда уходит задний конец.'],
+  wear: [['Валки', 'Зазор между валками', SH], ['Вводная и выводная проводки', 'Выверка', SH], BOLTS],
+  lube: PINCH_LUBE, checks: PINCH_CHECKS, notes: OIL_NOTES,
+};
+
+MAN.shear22 = {
+  src: '426.5 CRS Continuous Shear',
+  spec: [
+    ['Главный привод', 'Двигатель постоянного тока 45 кВт, 0–1500 об/мин'],
+    ['Привод диверторов', 'Серводвигатель 5,5 кВт (55 Н·м), 1000 об/мин'],
+    ['Межцентровое', '426,5 мм, передаточное отношение 1:1'],
+    ['Макс. линейная скорость', '33,5 м/с'],
+    ['Ножи', 'Ширина 50 мм, сталь H13 (1.2344), 55–58 HRC'],
+    ['Насос смазки', '0,75 кВт, 1440 об/мин, 12 л/мин'],
+  ],
+  design: [
+    'Ножи вращаются непрерывно с опережением на 10 % от скорости прокатки.',
+    'Входной дивертор переводит пруток через линию реза влево или вправо — в момент перехода ножи его режут на длину холодильника.',
+    'Выходной дивертор направляет пруток в левое или правое чугунное сопло и дальше на левый или правый лоток двухканального жёлоба.',
+    'Ножи закреплены в ножедержателях клиньями; зазор между ножами выставляется прокладками.',
+  ],
+  cycle: [
+    'Пруток идёт к левому соплу и левому лотку жёлоба.',
+    'По сигналу HMD диверторы перекладываются вправо: пруток пересекает линию реза, ножницы режут, хвост уходит в левый лоток, новый передний конец — в правый.',
+    'Левый лоток сбрасывает пруток на решётку, подвижные рейки делают цикл; далее переключение повторяется в другую сторону до конца заготовки.',
+  ],
+  wear: SHEAR_WEAR([['Входной и выходной диверторы', 'Давление воздуха у клапана, работа', SH]]),
+  lube: [GREASE, ['Ножницы', 'Масло ISO VG 320, автономная система с насосом']],
+  checks: SHEAR_CHECKS([['Затяжка болтов ножей и ножедержателей', SH], ['Работа диверторов', SH]]),
+  notes: OIL_NOTES,
+};
+
+MAN.shear23 = {
+  src: '1100 CRS Flying cum Crank Shear',
+  spec: [
+    ['Главный привод', 'Двигатель постоянного тока 300 кВт, 0–700 об/мин'],
+    ['Межцентровое', '1100 мм; радиус кривошипа 225 мм; передаточное отношение 1,33'],
+    ['Летучий режим', 'до 30,3 м/с, арматура Ø16–20'],
+    ['Кривошипный режим', 'до 12,4 м/с, арматура Ø25–40'],
+    ['Ножи', 'Ширина 200 мм, профильные под сечение, сталь H13 (1.2344), 51–53 HRC'],
+    ['Насос смазки', '1,1 кВт, 1440 об/мин, 16,8 л/мин'],
+  ],
+  design: [
+    'Делительные ножницы режут готовый пруток на длину холодильника; работают в режиме «старт-стоп», синхронизированы со станом.',
+    'Входной дивертор с пневмоцилиндром поочерёдно направляет пруток в левую или правую воронку и далее на левый или правый лоток жёлоба. На выходе — двухходовая проводка.',
+    'Два режима ножедержателей. Кривошипный: ножедержатели на кривошипных пальцах через втулки. Летучий: конические втулки, ножедержатели летучего режима, пальцы и стопорные планки, ножевые комплекты переносятся на оси.',
+    'Переход из кривошипного режима в летучий — 14 операций по мануалу: снять стопорную планку и ножевые комплекты, съёмником снять ножедержатели и втулки, поставить конические втулки и ножедержатели, установить и выставить ножи, затянуть и застопорить.',
+  ],
+  cycle: [
+    'Сигнал от HMD приходит одновременно на тянущие ролики и ножницы.',
+    'Дивертор срабатывает перед резом; двигатель разгоняет ножи до скорости на 7–10 % выше скорости прутка и режет, затем ножи паркуются.',
+    'Длину реза оптимизируют под массу заготовки, чтобы не оставалось коротких концов.',
+  ],
+  wear: SHEAR_WEAR([
+    ['Ножедержатели, втулки, конические втулки', 'Осмотр при смене режима', 'при смене режима'],
+    ['Дивертор', 'Давление воздуха у клапана, работа', SH],
+  ]),
+  lube: [GREASE, ['Редуктор', 'Масло ISO VG 320'], ['Ножницы', 'Масло ISO VG 320, автономная система с насосом']],
+  checks: SHEAR_CHECKS([['Затяжка болтов ножей и ножедержателей', SH], ['Работа дивертора', SH]]),
+  notes: OIL_NOTES,
+};
+
+MAN.funnel = {
+  src: 'Conveying Funnel',
+  spec: [['Комплекты', '3'], ['Сопла', 'Ø56 — арматура Ø28–40; Ø36 — Ø16–25; Ø22 — Ø8–12']],
+  design: [
+    'Воронки ведут пруток от ножниц 1100 CRS к тормозным тянущим роликам.',
+    'Комплект выбирают по размеру прокатываемой арматуры и ставят на стойки. Вход совмещают с выходной воронкой ножниц, выход — с вводной воронкой тянущих роликов.',
+    'Левая и правая воронки работают поочерёдно: дивертор ножниц переключается перед каждым резом.',
+  ],
+  wear: [BOLTS],
+  lube: [],
+  checks: [['Посторонний шум', SH], ['Затяжка болтов', WK]],
+};
+
+MAN.pinch25 = {
+  src: 'Double Speed Tail Braking Pinch Roll',
+  spec: [
+    ['Привод', 'Двигатели постоянного тока 60 кВт, 0–1500 об/мин — 2 шт.'],
+    ['Редукторы-шестерённые клети', '2 шт.: редуктор межосевое 200 мм, i = 3; шестерённая клеть 300 мм, 1:1'],
+    ['Скорость', 'Передача 1:1 — до 24,3 м/с; 3:1 — до 8,1 м/с'],
+    ['Валки', 'Ø310 × 80 мм, 4 шт.; раскрытие 60 мм'],
+    ['Пневмоцилиндр', 'Ø100/25, ход 90 мм'],
+    ['Кардан', 'Фланец Ø150, длина 400 мм'],
+  ],
+  design: [
+    'Тормозят пруток перед холодильником, чтобы он лёг точно на своё место.',
+    'Две линии роликов (линия 1 и линия 2) на общей раме, у каждой свой двигатель и двухскоростной редуктор; на входе и выходе — проводки.',
+  ],
+  cycle: [
+    'Двигатель соединяют с валом редуктора или шестерённой клети — по скорости прокатки.',
+    'Обе линии вращаются с заданной скоростью. По сигналу с выхода чистовой клети линия 1 зажимает пруток.',
+    'По сигналу реза делительных ножниц линия 1 раскрывается, а линия 2 закрывается; на следующем резе — наоборот.',
+    'С уходом заднего конца ролики раскрываются.',
+  ],
+  wear: [['Валки Ø310 × 80 мм (4 шт.)', 'Состояние рабочей поверхности', 'по осмотру'], ['Вводная и выводная проводки', 'Совмещение с калибром валков', 'при установке'], BOLTS],
+  lube: [GREASE, ['Шестерённые клети', 'Масло ISO VG 320']],
+  checks: [['Поток масла к подшипникам', SH], ['Утечки масла из шестерённой клети', SH], ['Разбрызгивание масла на зацепление', SH], ['Посторонний шум', SH],
+    ['Затяжка болтов', SH], ['Доливка масла в шестерённую клеть', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]],
+  notes: OIL_NOTES,
+};
+
+MAN.pinch26 = {
+  src: '300 CRS Spring Loaded Pinch Roll before Cooling Bed',
+  spec: [
+    ['Назначение', 'Скорость крупной арматуры Ø25, 28, 32 перед холодильником'],
+    ['Межцентровое валков', '300–350 мм; шестерённая клеть 300 мм'],
+    ['Валки', 'Ø300 мм, ширина 300 мм'],
+    ['Привод', 'Асинхронный двигатель 18,5 кВт, 970 об/мин, частотный привод'],
+    ['Передача', 'Ремённая 3:1; базовая линейная скорость 5,07 м/с'],
+  ],
+  design: ['Состав: тянущие ролики с пружинным прижимом, кардан, шестерённая клеть 300 CRS, двигатель со шкивом, шкив редуктора, рама.', 'Синхронизированы со скоростью стана.'],
+  cycle: ['Сигнал о прутке — с выхода чистовой клети; ролики зажимают пруток с задержкой по скорости.', 'Разжим — после ухода заднего конца.'],
+  wear: [['Валки', 'Зазор между валками', SH], ['Проводки', 'Выверка', SH], ['Ремни', 'Натяжение', 'по осмотру'], BOLTS],
+  lube: PINCH_LUBE, checks: PINCH_CHECKS, notes: OIL_NOTES,
+};
+
+const CB_SRC = 'Automatic Rake Type Cooling Bed with Motorized Twin Channel – 66 m';
+const CB_LUBE = [GREASE, ['Червячные редукторы и зубчатые передачи', 'Масло ISO VG 320, картерная смазка'], ['Эксцентрики подвижных реек', 'Масляная ванна эксцентрика, уровень — еженедельно']];
+const CB_CHECKS = [
+  ['Выверка кулачков двухканального жёлоба', SH], ['Визуальный контроль смазки', SH], ['Утечки масла из редукторов и ванн эксцентриков', SH], ['Смазка подшипников и втулок', SH],
+  ['Утечки в гидросистеме, цилиндрах и рукавах', SH], ['Посторонний шум', SH], ['Осмотр движущихся частей', SH], ['Доливка масла в редукторы', WK], ['Доливка масла в ванны эксцентриков', WK],
+  ['Затяжка болтов движущихся частей', WK], ['Натяжение цепей выравнивающего рольганга', WK], ['Затяжка всех болтов', MO], ['Выверка реек', MO],
+];
+MAN.channel = {
+  src: CB_SRC,
+  spec: [['Привод', 'Двигатели постоянного тока 15 кВт, 0–1500 об/мин — 2 шт.'], ['Редукторы', 'Червячные U800, i = 40'], ['Цикл лотка', '1,6 с']],
+  design: [
+    'Двухканальный жёлоб вдоль холодильника: левый и правый откидные лотки, центральный короб, колонны, поперечины, рама.',
+    'Лотки открываются кулачками с роликами-толкателями по всей длине; привод — двигатель, червячный редуктор, эксцентриковая муфта и валы.',
+    'Ход лотков у привода настраивается талрепами, затем кулачки выставляются так, чтобы лотки открывались одинаково по всей длине.',
+  ],
+  cycle: ['Пока пруток идёт в один лоток, другой после реза делает цикл и сбрасывает свой пруток на неподвижную решётку.'],
+  wear: [['Кулачки и ролики-толкатели', 'Выверка кулачков', SH], ['Талрепы привода лотков', 'Ход открытия и закрытия', 'при настройке'], ['Подшипники и втулки', 'Смазка', SH]],
+  lube: CB_LUBE, checks: CB_CHECKS, notes: OIL_NOTES,
+};
+MAN.coolbed = {
+  src: CB_SRC,
+  spec: [
+    ['Подвижные рейки', 'Двигатель постоянного тока 116 кВт, 1050 об/мин; 2 червячных редуктора U1400, i = 25'],
+    ['Цикл подвижных реек', '1,5 с'],
+    ['Выравнивающий рольганг', '28 мотор-редукторов 1,1 кВт, i = 12,03, 118 об/мин, частотный привод'],
+    ['Цепной шлеппер на выдаче', 'Двигатель 55 кВт, 980 об/мин, частотный привод; редуктор HTN 500, i = 202,53; шаг 40 мм за цикл; подъём гидроцилиндром'],
+  ],
+  design: [
+    'Холодильник реечного типа по принципу шагающей балки: подвижные рейки движутся эксцентриками через кулачки и ролики (фиксирующие и плавающие).',
+    'Состав: неподвижная приёмная решётка, неподвижные рейки, подвижные рейки на раме, эксцентрики с противовесами, масляные ванны эксцентриков, выравнивающий рольганг, цепной шлеппер, отводящий рольганг.',
+    'Противовесы стоят напротив выступов эксцентриков. В нулевом положении противовесы и эксцентрик повёрнуты на 15° от вертикали.',
+    'В начале и конце каждой секции ставят длинную подвижную и длинную неподвижную балку, чтобы не перегружать привод.',
+    'На холодильнике идёт третья стадия Tempcore — превращение сердцевины прутка.',
+  ],
+  cycle: [
+    'Пруток с лотка жёлоба ложится на неподвижную решётку; подвижные рейки делают цикл.',
+    'Шлеппер делает цикл с шагом 40 мм. После прутков одной заготовки рейки и шлеппер делают 2–3 холостых цикла, чтобы оставить промежуток.',
+    'Выравнивающий рольганг подравнивает концы прутков к выходу.',
+    'Шлеппер поднят — прутки переходят на отводящий рольганг; шлеппер опускается гидроцилиндром, рольганг везёт слой к ножницам холодной резки.',
+  ],
+  wear: [
+    ['Подвижные и неподвижные рейки', 'Выверка реек (смещение зубьев, уровень)', MO],
+    ['Эксцентрики, кулачки и ролики-толкатели', 'Осмотр движущихся частей, масло в ваннах', SH],
+    ['Цепи выравнивающего рольганга', 'Натяжение', WK],
+    ['Гидроцилиндры и рукава шлеппера', 'Утечки', SH],
+    ['Болты движущихся частей', 'Затяжка моментом', WK],
+  ],
+  lube: CB_LUBE, checks: CB_CHECKS, notes: OIL_NOTES,
+};
+MAN.runout = {
+  src: CB_SRC + ' · Hydraulic Cold Shear',
+  spec: [['Привод роликов', '55 мотор-редукторов 1,5 кВт, i = 9,77, 148 об/мин — индивидуальный'], ['Бочка ролика', '750 мм'], ['Скорость', '1,39 м/с (расчёт производительности ножниц)']],
+  design: ['Отводящий рольганг холодильника принимает слой прутков со шлеппера и подаёт его к ножницам холодной резки.'],
+  wear: [['Ролики и мотор-редукторы', 'Шум, уровень масла', SH], BOLTS],
+  lube: [GREASE, ['Мотор-редукторы', 'Масло ISO VG 320']],
+  checks: [['Посторонний шум', SH], ['Визуальный контроль смазки', SH], ['Доливка масла в мотор-редукторы', WK], ['Затяжка всех болтов', MO]],
+  notes: OIL_NOTES,
+};
+
+MAN.coldshear = {
+  src: 'Hydraulic Cold Shear – 300 Ton with Power Pack',
+  spec: [
+    ['Гидроцилиндр', 'Ø320/220, ход 200 мм'],
+    ['Усилие реза', '250 т (расчёт при 300 бар)'],
+    ['Мерная длина', '12 м'],
+    ['Цикл', '21 с: ход реза 9 с + оператор 2 с + перемещение слоя 10 с'],
+    ['Производительность', '35–40 т/ч; в слое: Ø8 — 44 прутка, Ø12 — 20, Ø16 — 11, Ø20 — 7, Ø25 — 5, Ø32 — 3, Ø40 — 2'],
+    ['Гидростанция', 'Бак 1000 л; сдвоенный пластинчатый насос 0–300 бар; двигатель 22 кВт, 1440 об/мин; кожухотрубный охладитель, вода 350 л/мин'],
+  ],
+  design: [
+    'Состав: корпус ножниц, гидроцилиндр, верхний и нижний ножи, входной прижим.',
+    'Гидросхема: бак с указателем уровня и сливной пробкой, всасывающий фильтр, насос, обратный клапан, модуль давления с манометром, 4/3-распределитель с пружинным возвратом, охладитель, сапун.',
+  ],
+  cycle: [
+    'Шлеппер холодильника кладёт слой на отводящий рольганг; рольганг подводит передний конец к ножницам и останавливается.',
+    'Ножницы обрезают передний конец; поднимается убирающийся упор.',
+    'Оба рольганга подают слой до упора, ножницы режут мерную длину 12 м, упор опускается, отрезанный слой уходит.',
+    'Цикл повторяется, пока через ножницы не пройдёт задний конец слоя.',
+  ],
+  wear: [['Ножи верхний и нижний', 'Состояние режущих кромок', 'по осмотру'], ['Направляющие, подшипники, втулки', 'Смазка', SH], ['Гидросистема', 'Утечки', SH], BOLTS],
+  lube: [['Подшипники, втулки, направляющие', GREASE[1]], ['Гидросистема', 'Гидравлическое масло ISO VG 68 или аналог']],
+  checks: [['Смазка направляющих, подшипников и втулок', SH], ['Утечки в гидросистеме', SH], ['Посторонний шум', SH], ['Затяжка болтов', SH], ['Доливка масла в бак', WK], ['Слив, очистка и заливка гидромасла', OIL_CHANGE]],
+  notes: ['Замена гидромасла — каждые 5000–6000 ч или раз в год, что раньше. Масла разных производителей не смешивать.'],
+};
+
+const RT = (src, spec, design = []) => ({ src: 'Roller Tables' + (src ? ' · ' + src : ''), spec, design, wear: TABLE_WEAR, lube: TABLE_LUBE, checks: TABLE_CHECKS, notes: OIL_NOTES });
+MAN.chargeTable = RT('Charging Grate', [
+  ['Привод', 'Асинхронные двигатели 11 кВт, 960 об/мин — 3 шт.'], ['Редукторы', '125 CRS, i = 4 — 3 шт.'], ['Передачи', 'Ремённая 2,51; цепная 1,42'],
+  ['Ролики', 'Ø244 × 700 мм — 17 шт.'], ['Скорость', '0,85 м/с'],
+], ['Групповой привод роликов: двигатель → клиновые ремни → редуктор → цепи и звёздочки.', 'Два упора на рольганге.', 'Верх рельсов загрузочной решётки на 10 мм выше верха роликов.']);
+MAN.dischTable = RT('', [['Привод', 'Мотор-редукторы 2,2 кВт, i = 16,25, 88 об/мин — 7 шт.'], ['Ролики', 'Ø244 × 700 мм — 7 шт.'], ['Скорость', '1,12 м/с']],
+  ['Индивидуальный привод каждого ролика; на рольганге — упор.']);
+MAN.workExt = RT('', [['Привод', 'Мотор-редукторы 4 кВт, i = 7,7, 186 об/мин — 3 шт.'], ['Ролики', 'Ø244 × 1500 мм — 6 шт.'], ['Скорость', '2,37 м/с']]);
+MAN.workTable = RT('', [['Привод', 'Асинхронные двигатели 11 кВт, 960 об/мин — 4 шт.'], ['Редукторы', '125 CRS, i = 4 — 4 шт.'], ['Передача', 'Ремённая 1,33'], ['Ролики', 'Ø244 × 1500 мм — 21 шт.'], ['Скорость', '2,31 м/с']],
+  ['Верх роликов у черновой клети — на 87,5 мм ниже нижней линии прокатки.']);
+MAN.yTable = RT('', [['Привод', 'Асинхронные двигатели 11 кВт, 960 об/мин — 2 шт.; редуктор 125 CRS, i = 4'], ['Передача', 'Ремённая 1,33'], ['Ролики', 'Переменного диаметра × 1620 мм — 6 шт.; Ø244 × 1600 мм — 5 шт.'], ['Скорость', '2,31 м/с']],
+  ['Верхние и нижние ролики Y-рольганга подают раскат в калибры верхней и нижней линий клети трио.']);
+MAN.yExt = RT('', [['Привод', 'Асинхронные двигатели 11 кВт, 960 об/мин — 4 шт.'], ['Редукторы', '125 CRS, i = 4 — 4 шт.'], ['Передача', 'Ремённая 1,33'], ['Ролики', 'Ø244 × 1100 мм — 20 шт.'], ['Скорость', '2,30 м/с']]);
+MAN.approach = RT('', [['Привод', 'Асинхронные двигатели 5,5 кВт, 960 об/мин — 3 шт.'], ['Редукторы', '125 CRS, i = 3,15 — 3 шт.'], ['Ролики', 'Ø177 × 200 мм — 26 шт.'], ['Скорость', '2,82 м/с']]);
+MAN.afterShear = RT('', [
+  ['После ножниц', 'Мотор-редукторы 1,1 кВт, i = 9,61, 147 об/мин — 12 шт.; ролики Ø180 × 750 мм — 12 шт.'],
+  ['Перед шлеппером', 'Мотор-редукторы 1,1 кВт — 11 шт.; ролики Ø180 × 750 мм — 12 шт.'],
+  ['Скорость', '1,38 м/с'],
+], ['Два участка: рольганг после ножниц холодной резки с убирающимся упором и рольганг перед цепным шлеппером.']);
+MAN.stoppers = RT('', [['Упор после ножниц холодной резки', 'Пневмоцилиндр Ø80/25, ход 130 мм'], ['Упор после вязальной машины', 'Пневмоцилиндр Ø125/32, ход 265 мм']],
+  ['Упор после ножниц задаёт мерную длину 12 м: поднимается перед резом и опускается, чтобы пропустить отрезанный слой.']);
+MAN.stoppers.wear = [['Пневмоцилиндры упоров', 'Работа, утечки воздуха', 'по осмотру']];
+MAN.stoppers.checks = [];
+MAN.stoppers.lube = [GREASE]; delete MAN.stoppers.notes;
+MAN.afterChain = RT('3 Layer Chain Transfer & S-Arm', [['Ролики', 'Ø218 × 300 мм — 10 шт. (горизонтально-вертикальный рольганг S-образного рычага)'], ['Привод', 'Мотор-редукторы 2,2 кВт, i = 10,89, 131 об/мин — 10 шт.'], ['Скорость', '1,5 м/с'],
+  ['Перед вязальными машинами', 'Ролики Ø218 × 300 мм — 4 шт., мотор-редукторы 2,2 кВт — 4 шт.']], ['Горизонтально-вертикальный рольганг принимает пучок с S-образного рычага и везёт его к вязальным машинам.']);
+MAN.afterTying = RT('', [['Ролики', 'Ø218 × 300 мм — 13 шт.'], ['Привод', 'Мотор-редукторы 2,2 кВт, i = 10,89, 131 об/мин — 12 шт.'], ['Скорость', '1,5 м/с']],
+  ['Состав участка: рольганг, неподвижный упор, убирающийся упор, сбрасыватель, карманы, прижимной ролик.']);
+MAN.cradles = { ...RT('', [['Карманы', 'Гидроцилиндр Ø100/65, ход 250 мм'], ['Сбрасыватель', 'Рычаги сбрасывателя с рольганга после вязки']],
+  ['Готовый пучок после вязки доходит до зоны сбрасывателя и сбрасывается в карман.']), wear: [['Гидроцилиндр карманов', 'Утечки', 'по осмотру'], BOLTS], checks: [['Посторонний шум', SH]] };
+delete MAN.cradles.notes;
+
+MAN.grate = {
+  src: 'Charging Grate',
+  spec: [
+    ['Привод', 'Гидроцилиндры Ø125/90, ход 1150 мм — 2 шт.'],
+    ['Направляющие', '2 склиза; 4 рельса 60 lb длиной 7135 мм'],
+    ['Заготовка', '150 × 150 мм, длина 6 м'],
+    ['Вместимость', '19,25 т'],
+  ],
+  design: ['Решётка принимает пачки заготовок и по одной подаёт их на загрузочный рольганг печи.', 'Верх рельсов — на 10 мм выше верха роликов загрузочного рольганга; склизы и рельсы перпендикулярны рольгангу.'],
+  cycle: [
+    'Краном с магнитом на решётку кладут пачки по 4 заготовки, пока она не заполнится.',
+    'Гидроцилиндр делает один цикл и сбрасывает 4 заготовки на рольганг (рольганг стоит).',
+    'Рольганг видит заготовку и везёт её к окну загрузки печи; так 4 раза, затем цикл повторяется.',
+  ],
+  wear: [['Склизы и рельсы', 'Состояние, превышение над роликами 10 мм', 'по осмотру'], ['Гидроцилиндры и трубопроводы', 'Утечки', SH], BOLTS],
+  lube: [GREASE, ['Гидросистема', 'Гидравлическое масло; замена 5000–6000 ч или раз в год']],
+  checks: [['Посторонний шум', SH], ['Утечки в гидравлических трубопроводах', SH], ['Затяжка болтов', SH], ['Слив, очистка и заливка гидромасла', OIL_CHANGE]],
+};
+
+MAN.chainHot = {
+  src: 'Hot Billet Chain Transfer with Billet Discard',
+  spec: [
+    ['Привод', 'Асинхронный двигатель 15 кВт, 960 об/мин'],
+    ['Редуктор', '475 CRS, i = 30'],
+    ['Длина перекладки', '6 м'],
+    ['Способ', 'Цепи с упорами (carrier dog) — 3 цепи, по 2 упора'],
+    ['Скорость', '0,77 м/с'],
+    ['Карманы отбраковки', '3 шт.'],
+  ],
+  design: [
+    'Перекладывает горячую заготовку с рольганга выдачи печи на рабочий рольганг стана; при остановке стана сбрасывает заготовку в карманы отбраковки.',
+    'Состав: цепи с упорами, склизы, приводной вал, зубчатые муфты, редуктор, двигатель, карманы.',
+    'Верх цепей и склизов — на 30 мм ниже верха роликов рольгангов; вне рольгангов склиз на 50 мм выше цепи. Все четыре упора стоят на одной линии.',
+  ],
+  cycle: ['Рольганг выдачи останавливает заготовку в зоне перекладки.', 'Шлеппер включается, упоры переносят заготовку на рабочий рольганг, шлеппер останавливается.', 'Рабочий рольганг везёт заготовку к стану.'],
+  wear: [['Цепи', 'Натяжение (натяжным устройством)', SH], ['Упоры цепей', 'Положение на одной линии', 'по осмотру'], ['Склизы', 'Превышение над цепью 50 мм', 'по осмотру']],
+  lube: [GREASE, ['Редуктор', 'Масло ISO VG 320, картерная смазка']],
+  checks: [['Посторонний шум', SH], ['Уровень масла в редукторе', WK], ['Натяжение цепей', SH], ['Доливка масла в редуктор', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]],
+  notes: OIL_NOTES,
+};
+
+const CT_SRC = '3 Layer Chain Transfer & S-Arm';
+MAN.chain33 = {
+  src: CT_SRC,
+  spec: [
+    ['Шлеппер 1 (подъёмный)', '15 кВт, 1460 об/мин, частотный привод; редуктор HC 475, i = 50; длина 3 м; подъём 2 гидроцилиндрами Ø125/70, ход 100 мм'],
+    ['Шлеппер 2', '15 кВт, частотный привод; редуктор HC 475, i = 50; длина 3,7 м'],
+    ['Шлеппер 3', '15 кВт, частотный привод; редуктор HC 475, i = 30; длина 3,53 м'],
+    ['Цепи', 'Однорядные роликовые с шагом 1½" — по 10 на каждый шлеппер'],
+    ['Скорость', '0,43 м/с (базовая)'],
+  ],
+  design: [
+    '«Трёхслойный» — три последовательных цепных шлеппера. Каждый следующий идёт на 20 % быстрее предыдущего, поэтому прутки расходятся и ложатся ровным слоем.',
+    'Верх цепей шлеппера 1 в нижнем положении — на 40 мм ниже верха роликов рольганга.',
+  ],
+  cycle: [
+    'Рольганг подводит прутки в зону подъёма и останавливается; шлеппер 1 поднимает их.',
+    'Цепи включаются; прутки разделяются при переходе на шлеппер 2 и 3.',
+    'Заданное число прутков для пучка падает на S-образный рычаг, шлепперы останавливаются.',
+  ],
+  wear: [['Цепи и звёздочки', 'Натяжение (натяжным устройством)', SH], ['Подъёмные гидроцилиндры', 'Утечки', 'по осмотру']],
+  lube: [GREASE, ['Редукторы', 'Масло ISO VG 320']],
+  checks: [['Посторонний шум', SH], ['Уровень масла в редукторах', WK], ['Натяжение цепей', SH], ['Доливка масла', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]],
+  notes: OIL_NOTES,
+};
+MAN.sarm = {
+  src: CT_SRC,
+  spec: [
+    ['Привод рычага', 'Мотор-редуктор с тормозом 15 кВт, i = 178, 8,16 об/мин, частотный привод'],
+    ['Упор прутков', 'Пневмоцилиндры Ø125/32, ход 250 мм — 2 шт.'],
+    ['Выравнивающий толкатель', 'Пневмоцилиндр Ø200/40, ход 200 мм'],
+  ],
+  design: ['S-образный рычаг собирает прутки пучка и опускает пучок на горизонтально-вертикальный рольганг.'],
+  cycle: ['Поднимается упор прутков; толкатель выравнивает пучок по длине.', 'Рычаг кладёт пучок на рольганг и возвращается в положение приёма; рольганг везёт пучок к вязальным машинам, упор опускается.'],
+  wear: [['Пневмоцилиндры упора и толкателя', 'Работа, утечки воздуха', 'по осмотру'], ['Тормоз мотор-редуктора', 'Работа', 'по осмотру']],
+  lube: [GREASE, ['Мотор-редуктор', 'Масло ISO VG 320']],
+  checks: [['Посторонний шум', SH], ['Уровень масла в мотор-редукторе', WK]],
+};
+MAN.tying = {
+  src: 'Tying Machine',
+  spec: [
+    ['Скручивающий механизм', 'Мотор-редуктор 5,5 кВт, i = 29,9, 48,83 об/мин'],
+    ['Цикл вязки', '10–15 с'],
+    ['Подъём захвата', 'Гидроцилиндры Ø50/30, ход 300 мм — 2 шт.'],
+    ['Зажим захвата', 'Гидроцилиндры Ø50/30, ход 200 мм — 2 шт.'],
+    ['Опускание скрутчика', 'Гидроцилиндр Ø80/45, ход 270 мм'],
+    ['Пучок', 'Ø225–300 мм'],
+    ['Вязальный пруток', 'Ø6 × 1100 мм, подача вручную'],
+  ],
+  design: ['Состав: корпус, цилиндр подъёма захвата, губки захвата, цилиндр захвата, цилиндр опускания скрутчика, мотор-редуктор, шпиндель, скрутчик.'],
+  cycle: [
+    'Рольганг доводит пучок до поднятого упора за второй машиной.',
+    'Захваты поднимаются, в губки подают вязальный пруток, губки сжимаются.',
+    'Скрутчик опускается, захватывает пруток и скручивает его; все цилиндры возвращаются.',
+    'Упор опускается, рольганг проходит 3,3 м — вторая вязка; затем пучок уходит к сбрасывателю.',
+  ],
+  wear: [['Губки захвата и скрутчик', 'Состояние', 'по осмотру'], ['Вязальный пруток Ø6 × 1100 мм', 'Расходный материал, подаётся вручную', '1 пруток на вязку'], ['Гидроцилиндры', 'Утечки', 'по осмотру']],
+  lube: [GREASE, ['Мотор-редуктор', 'Масло ISO VG 320'], ['Гидросистема', 'Гидравлическое масло VG 68 или аналог']],
+  checks: [['Посторонний шум', SH], ['Затяжка болтов', SH], ['Слив, очистка и заливка гидромасла', OIL_CHANGE]],
+};
+
+const LUBE300 = {
+  src: '300 LPM Centralized Oil Lubrication System · Gearboxes',
+  spec: [
+    ['Насосы', 'Шестерённые, 300 л/мин, 5 бар — 1 рабочий + 1 резервный'],
+    ['Двигатели насосов', '7,5 кВт, 1440 об/мин — 1 + 1'],
+    ['Бак', '3000 л'],
+    ['Масло', 'ISO VG 320'],
+    ['Давление на входе в редуктор', '1,5–1,8 бар'],
+  ],
+  design: [
+    'Станция подаёт масло под давлением к зацеплениям и подшипникам редукторов и шестерённых клетей стана; масло возвращается самотёком.',
+    'Состав: бак с указателем уровня, насосные агрегаты, ограничитель давления, фильтрация (сдвоенный фильтр, Y-фильтр), охлаждение водой, реле давления. При низкой температуре масло подогревается на станции.',
+    'Медленный рост температуры или учащение замены фильтров — признак износа насосов, уплотнений и старения масла; резкий рост температуры — сигнал к немедленной проверке.',
+  ],
+  cycle: ['Смазку включают за 15 мин до пуска главных двигателей.'],
+  wear: [['Фильтр бака', 'Засорение, очистка', SH], ['Сапун бака', 'Засорение, очистка', SH], ['Сдвоенный фильтр', 'Очистка', WK], ['Y-фильтр', 'Очистка', SH], ['Насосы, уплотнения', 'По температуре масла и частоте замены фильтров', 'по тренду']],
+  lube: [['Система', 'Масло ISO VG 320; при заливке — абсолютная чистота, сетки на заливной горловине не снимать']],
+  checks: [['Уровень масла в баке', SH], ['Температура масла', SH], ['Утечки в трубопроводах, баке, редукторах', SH], ['Давление на входе в редуктор 1,5–1,8 бар', SH], ['Засорение охлаждающей воды', SH],
+    ['Посторонний шум', SH], ['Работа реле давления', SH], ['Загрязнение масла', WK], ['Затяжка болтов', SH], ['Слив, очистка и заливка масла', OIL_CHANGE]],
+  notes: ['Агрессивные моющие средства и растворители не применять — портят уплотнения.'],
+};
+for (let i = 1; i <= 5; i++) MAN['lube' + i] = LUBE300;
+MAN.hpp4 = {
+  src: 'Hydraulic Cold Shear – 300 Ton with Power Pack',
+  spec: [['Назначение', 'Гидростанция ножниц холодной резки (отнесена по расположению рядом с ножницами)'], ['Бак', '1000 л'], ['Насос', 'Сдвоенный пластинчатый, 0–300 бар'], ['Двигатель', '22 кВт, 1440 об/мин'], ['Охладитель', 'Кожухотрубный, вода 350 л/мин, 3 бар'], ['Масло', 'ISO VG 68']],
+  design: ['Состав: бак со сливной пробкой и указателем уровня, всасывающий фильтр, насос, обратный клапан, модуль давления с манометром, 4/3-распределитель с пружинным возвратом, клеммная коробка, охладитель, сапун.'],
+  wear: [['Всасывающий фильтр и сапун', 'Засорение', 'по осмотру'], ['Уплотнения и рукава', 'Утечки', SH]],
+  lube: [['Гидросистема', 'Гидравлическое масло ISO VG 68 или аналог']],
+  checks: [['Утечки в гидросистеме', SH], ['Доливка масла в бак', WK], ['Слив, очистка и заливка масла', OIL_CHANGE]],
+};
+
+// group cards for legend clicks that select several objects
+MAN_NO[14] = CROP('Между клетями C2–C3 и C8–C9', '500 (C2–C3) / 0–900 (C8–C9)', '4,27 (C2–C3) / 7,7 (C8–C9)');
+MAN_NO[18] = LOOPER;
+MAN_NO[44] = LUBE300;
+
+// ---------------------------------------------------------------------------
 // UI: legend, layers, views, picking, info card
 // ---------------------------------------------------------------------------
 const legendEl = document.getElementById('legend');
@@ -1411,7 +2099,7 @@ function clearSel() {
   legendEl.querySelectorAll('.lg-row.sel').forEach((e) => e.classList.remove('sel'));
   selected = [];
 }
-function select(keys, frame = false, legendHead = null) {
+function select(keys, frame = false, legendHead = null, hit = null) {
   clearSel();
   const inside = keys.some((k) => { const r = objects.get(k); return r && (r.group.parent === equipRoot || r.group.parent === craneRoot); });
   if (frame && inside && layerState.roof) { layerState.roof = false; layerState.cut = true; document.getElementById('t-roof').checked = false; document.getElementById('t-cut').checked = true; applyLayers(); }
@@ -1429,12 +2117,13 @@ function select(keys, frame = false, legendHead = null) {
   document.getElementById('i-no').textContent = no ? String(no).padStart(2, '0') : '—';
   document.getElementById('i-title').textContent = legendHead && keys.length > 1 ? legendHead.title : r0.title;
   document.getElementById('i-en').textContent = r0.en;
-  const fl = document.getElementById('i-facts'); fl.innerHTML = '';
-  for (const f of r0.facts) { const li = document.createElement('li'); li.textContent = f; fl.appendChild(li); }
-  if (keys.length > 1) { const li = document.createElement('li'); li.textContent = `В модели: ${keys.length} шт.`; fl.appendChild(li); }
   const c = union.getCenter(new THREE.Vector3());
   const fmt = (v) => v.toFixed(1).replace('.', ',').replace('-', '−');
-  document.getElementById('i-dwg').textContent = (r0.dwg ? r0.dwg + ' · ' : '') + `центр: X ${fmt(c.x)} м, Z ${fmt(c.z)} м`;
+  const facts = r0.facts.slice();
+  if (keys.length > 1) facts.push(`В модели: ${keys.length} шт.`);
+  const man = (keys.length > 1 && no && MAN_NO[no]) || MAN[keys[0]] || null;
+  renderInfo(facts, man);
+  document.getElementById('i-dwg').textContent = (r0.dwg ? 'Чертежи: ' + r0.dwg + ' · ' : '') + `центр: X ${fmt(c.x)} м, Z ${fmt(c.z)} м`;
   info.hidden = false;
   const lrKey = no ? 'n' + no : keys[0];
   const lr = legendRows.get(lrKey); if (lr) { lr.classList.add('sel'); lr.scrollIntoView({ block: 'nearest' }); }
@@ -1449,6 +2138,80 @@ function select(keys, frame = false, legendHead = null) {
   }
 }
 document.getElementById('i-close').addEventListener('click', () => { clearSel(); info.hidden = true; });
+
+// --- tabbed description card
+const iTabs = document.getElementById('i-tabs'), iBody = document.getElementById('i-body'), iMan = document.getElementById('i-man');
+let infoTab = 'over', infoState = null;
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+function chipFor(t) {
+  const s = t.toLowerCase();
+  const cls = /каждую смену|в смену|час|каждые 2 ч/.test(s) && !/5000/.test(s) ? 'hi' : /недел/.test(s) ? 'md' : 'lo';
+  return el('span', 'chip ' + cls, t);
+}
+function tableKV(rows) {
+  const t = el('table', 't2'), tb = el('tbody');
+  for (const [k, v] of rows) { const tr = el('tr'); tr.append(el('th', null, k), el('td', null, v)); tb.append(tr); }
+  t.append(tb); return t;
+}
+function tableWear(rows) {
+  const t = el('table', 't3'), tb = el('tbody');
+  for (const [part, what, when] of rows) { const tr = el('tr'); const td = el('td'); td.append(el('div', null, part), el('div', 'sub', what)); const ti = el('td', 'i'); ti.append(chipFor(when)); tr.append(td, ti); tb.append(tr); }
+  t.append(tb); return t;
+}
+function tableChecks(rows) {
+  const t = el('table', 't3'), tb = el('tbody');
+  for (const [what, when] of rows) { const tr = el('tr'); const ti = el('td', 'i'); ti.append(chipFor(when)); tr.append(el('td', null, what), ti); tb.append(tr); }
+  t.append(tb); return t;
+}
+function list(items, tag = 'ul') { const u = el(tag); for (const i of items) u.append(el('li', null, i)); return u; }
+const TABS = [
+  ['over', 'Обзор', (st) => true],
+  ['design', 'Конструкция', (st) => st.man && ((st.man.design || []).length || (st.man.cycle || []).length)],
+  ['wear', 'Износ', (st) => st.man && (st.man.wear || []).length],
+  ['service', 'Смазка и ТО', (st) => st.man && ((st.man.lube || []).length || (st.man.checks || []).length)],
+];
+function renderTab(id) {
+  const st = infoState, m = st.man;
+  infoTab = id;
+  iTabs.querySelectorAll('.itab').forEach((b) => { const on = b.dataset.tab === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+  iBody.replaceChildren();
+  if (id === 'over') {
+    iBody.append(list(st.facts));
+    if (m && m.spec && m.spec.length) { iBody.append(el('h4', null, 'Технические данные по мануалу'), tableKV(m.spec)); }
+  } else if (id === 'design') {
+    if (m.design && m.design.length) iBody.append(list(m.design));
+    if (m.cycle && m.cycle.length) iBody.append(el('h4', null, 'Цикл работы'), list(m.cycle, 'ol'));
+  } else if (id === 'wear') {
+    iBody.append(el('p', 'lead', 'Быстроизнашивающиеся и сменные детали — по разделу «Frequent checks» и описанию узлов в мануале.'), tableWear(m.wear));
+    if (m.wear.some((w) => /по осмотру/.test(w[2]))) iBody.append(el('p', 'note', '«По осмотру» — мануал называет деталь, но периодичность контроля не задаёт.'));
+  } else if (id === 'service') {
+    if (m.lube && m.lube.length) iBody.append(el('h4', null, 'Смазка'), tableKV(m.lube));
+    if (m.checks && m.checks.length) iBody.append(el('h4', null, 'Регулярные проверки'), tableChecks(m.checks));
+    if (m.notes && m.notes.length) for (const n of m.notes) iBody.append(el('p', 'note', n));
+  }
+  iBody.scrollTop = 0;
+}
+function renderInfo(facts, man) {
+  infoState = { facts, man };
+  iTabs.replaceChildren();
+  const avail = TABS.filter(([, , ok]) => ok(infoState));
+  for (const [id, label] of avail) {
+    const b = el('button', 'itab', label); b.dataset.tab = id; b.setAttribute('role', 'tab');
+    if (man) { const cnt = id === 'wear' ? man.wear?.length : id === 'service' ? man.checks?.length : 0; if (cnt) b.append(el('span', 'n', String(cnt))); }
+    b.addEventListener('click', () => renderTab(id));
+    iTabs.append(b);
+  }
+  iTabs.hidden = avail.length < 2;
+  iMan.replaceChildren();
+  if (man) { iMan.append(el('b', null, 'Мануал: '), document.createTextNode(man.src)); }
+  iMan.hidden = !man;
+  renderTab(avail.some(([id]) => id === infoTab) ? infoTab : 'over');
+}
+iTabs.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const tabs = [...iTabs.querySelectorAll('.itab')]; const i = tabs.findIndex((t) => t.classList.contains('on'));
+  const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); renderTab(n.dataset.tab);
+});
 
 const ray = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
@@ -1490,7 +2253,7 @@ renderer.domElement.addEventListener('pointerup', (ev) => {
   pointerDown = null;
   if (moved > 5) return;
   const h = pick(ev);
-  if (h) select([h.object.userData.key], false); else { clearSel(); info.hidden = true; }
+  if (h) select([h.object.userData.key], false, null, h.point); else { clearSel(); info.hidden = true; }
 });
 renderer.domElement.addEventListener('dblclick', (ev) => { const h = pick(ev); if (h) select([h.object.userData.key], true); });
 renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; });
@@ -1576,5 +2339,5 @@ function animate() {
 animate();
 </script>
 
-</body></html>
-
+</body>
+</html>
