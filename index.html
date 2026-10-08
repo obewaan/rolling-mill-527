@@ -298,6 +298,7 @@ table.tq tbody tr:nth-child(odd) { background: var(--chip); }
             <div><b>Описания оборудования:</b> руководства по монтажу, эксплуатации и обслуживанию P-527 (Preet Brothers, 1-е изд., окт.–нояб. 2024) — клети, ножницы, петлеобразователи, TMT, тянущие ролики, холодильник, рольганги, редукторы, централизованная смазка 300 л/мин. В карточке объекта: вкладки «Конструкция» (с подшипниками), «Износ», «Смазка и ТО» (с объёмами ГСМ).</div>
             <div><b>Фундаменты:</b> сводный план фундаментов и бетона цеха с исполнительной съёмкой — перенесена проектная геометрия, фактические отклонения (dx, dy, отметки съёмки) не учитывались. Отметки верха — по надписям на планах Preet 527-200…804 и CTE 1119; фундаменты колонн — по РП UZLITI. Пол непрозрачный: над полом видны тумбы и плиты, приямки, каналы и желоба вскрыты в полу; заглублённые массивы и фундаменты колонн остаются под полом. Желоба окалины показаны с условным днищем.</div>
             <div><b>Оборудование:</b> GA 527-231p1 (черновая клеть), 527-315p1 (клети C1–C2), P527-302sh01 r1 (краны), 527-804 (водное хозяйство), 527-800 (ECR).</div>
+            <div><b>Основная линия и приводы:</b> оси клетей, расположение редукторов-шестерённых клетей и двигателей сверены с планом 527-101sh01 r8 в векторе; форма двигателей, редукторов, шпинделей и муфт — по рисункам из мануалов P-527.</div>
             <div><b>Печь:</b> деталировочные чертежи Preet Brothers CTE 1119-00 R9 (GA), -02 R3 (футеровка), -03 R1 (каркас), -05 R0 (воздух горения), -06 R0 (газ); газовая рампа 4″ — GA Continental Thermal Engineers (09.04.24). Печь, боров, рекуператор, труба и трубопроводы — по размерам чертежей; трасса газа от рампы до печи — условно.</div>
             <div>Оборудование показано упрощённо (уровень детализации LOD 200): положение и габариты в плане сняты с чертежа, высоты взяты из GA-чертежей или приняты типовыми. Вспомогательные здания показаны по плану 527-101; в РП UZLITI их состав и привязка отличаются.</div>
             <div class="mono">Координаты: X от оси 1, Z от оси А, м. 1 клетка подложки = чертёж 1:1.</div>
@@ -690,23 +691,246 @@ function make(key, no, info, buildFn, parent, labelText) {
 // Equipment primitives
 // ---------------------------------------------------------------------------
 // Roller table along X (axis='x') or along Z (axis='z'); motorSide ±1 across.
+// pipe between two points; run = polyline with elbows (spheres) at the joints
+const _qp = new THREE.Quaternion(), _up = new THREE.Vector3(0, 1, 0);
+function pipe(b, mat, r, a, c, seg = 12, rEnd) {
+  const p1 = new THREE.Vector3(...a), p2 = new THREE.Vector3(...c), len = p1.distanceTo(p2);
+  if (len < 1e-4) return;
+  const g = new THREE.CylinderGeometry(rEnd ?? r, r, len, seg);
+  _qp.setFromUnitVectors(_up, p2.clone().sub(p1).normalize());
+  g.applyQuaternion(_qp);
+  g.translate((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
+  return b.add(g, mat);
+}
+function elbow(b, mat, r, p, seg = 12) { const g = new THREE.SphereGeometry(r, seg, Math.max(6, seg >> 1)); g.translate(...p); return b.add(g, mat); }
+function run(b, mat, r, pts, seg = 12) { for (let i = 1; i < pts.length; i++) { pipe(b, mat, r, pts[i - 1], pts[i], seg); if (i < pts.length - 1) elbow(b, mat, r, pts[i], seg); } }
+// square frustum (hoppers, transitions): half-sizes at bottom (y0) and top (y1)
+function frustum(b, mat, cx, cz, y0, y1, h0, h1) {
+  const g = new THREE.CylinderGeometry(h1 * Math.SQRT2, h0 * Math.SQRT2, y1 - y0, 4, 1);
+  g.rotateY(Math.PI / 4); g.translate(cx, (y0 + y1) / 2, cz);
+  return b.add(g, mat);
+}
+
+// ---------------------------------------------------------------------------
+// DRIVES — DC/AC motors, reducers-cum-pinion stands, couplings, spindles, geared motors.
+// Plan layout from 527-101 r8 (vector), shapes from the O&M manual figures (Preet Brothers, P-527).
+// Local frame F = { x, z, d }: u runs along the shaft away from the driven machine, v across it.
+// d = '-z' (toward row В), '+z' (toward row A), '+x', '-x'.
+// ---------------------------------------------------------------------------
+M.motorDark = std(0x23497c, { r: 0.5, m: 0.35 });
+M.gearDark = std(0x37546d, { r: 0.5, m: 0.3 });
+M.pipeOil = std(0x8a6a22, { r: 0.5, m: 0.2 });
+const FW = (F, u, v) => (F.d === '-z' ? [F.x + v, F.z - u] : F.d === '+z' ? [F.x - v, F.z + u] : F.d === '+x' ? [F.x + u, F.z + v] : [F.x - u, F.z - v]);
+const FP = (F, u, v, y) => { const [x, z] = FW(F, u, v); return [x, y, z]; };
+function lbox(b, mat, F, u0, u1, v0, v1, y0, y1) { const [xa, za] = FW(F, u0, v0), [xb, zb] = FW(F, u1, v1); return boxMM(b, mat, xa, y0, za, xb, y1, zb); }
+const lcu = (b, mat, F, r, u0, u1, v, y, seg = 16, rEnd) => pipe(b, mat, r, FP(F, u0, v, y), FP(F, u1, v, y), seg, rEnd);
+const lcv = (b, mat, F, r, u, v0, v1, y, seg = 16) => pipe(b, mat, r, FP(F, u, v0, y), FP(F, u, v1, y), seg);
+const lcy = (b, mat, F, r, u, v, y0, y1, seg = 12) => pipe(b, mat, r, FP(F, u, v, y0), FP(F, u, v, y1), seg);
+// octagonal prism along u (laminated DC-motor frame with chamfered corners), half = half the flat-to-flat size
+function loct(b, mat, F, half, u0, u1, v, y) {
+  const R = half / Math.cos(Math.PI / 8), g = new THREE.CylinderGeometry(R, R, Math.abs(u1 - u0), 8);
+  g.rotateY(Math.PI / 8);
+  if (F.d === '-z' || F.d === '+z') g.rotateX(Math.PI / 2); else g.rotateZ(Math.PI / 2);
+  const [xa, za] = FW(F, u0, v), [xb, zb] = FW(F, u1, v);
+  g.translate((xa + xb) / 2, y, (za + zb) / 2);
+  return b.add(g, mat);
+}
+
+// DC mill motor: square laminated frame, forced-air blower on top at the driving end, terminal box on the side,
+// tacho at the non-driving end, fabricated base frame. Returns the shaft height.
+function dcMotor(b, F, uDE, L, v, pad, o = {}) {
+  const w = o.w ?? 0.74, h = w / 2, hb = o.hb ?? 0.2, ay = pad + hb + 0.04 + h, uN = uDE + L, tb = o.tb ?? 1;
+  // base frame: top and bottom flanges, side webs, ribs
+  lbox(b, M.tableFrame, F, uDE - 0.04, uN + 0.04, v - h - 0.1, v + h + 0.1, pad, pad + 0.04);
+  lbox(b, M.tableFrame, F, uDE - 0.04, uN + 0.04, v - h - 0.1, v + h + 0.1, pad + hb - 0.04, pad + hb);
+  for (const s of [-1, 1]) lbox(b, M.tableFrame, F, uDE - 0.04, uN + 0.04, v + s * (h + 0.05) - 0.02, v + s * (h + 0.05) + 0.02, pad + 0.04, pad + hb - 0.04);
+  for (let u = uDE + 0.1; u < uN; u += 0.34) for (const s of [-1, 1]) lbox(b, M.frame, F, u - 0.012, u + 0.012, v + s * (h + 0.07), v + s * (h + 0.1), pad + 0.04, pad + hb - 0.04);
+  // feet
+  for (const s of [-1, 1]) lbox(b, M.motorDark, F, uDE + 0.12, uN - 0.12, v + s * (h - 0.09) - 0.08, v + s * (h - 0.09) + 0.08, pad + hb, ay - h + 0.1);
+  // frame, frame rings, end shields, bearing caps, shaft
+  loct(b, M.motor, F, h, uDE + 0.1, uN - 0.1, v, ay);
+  for (const u of [uDE + 0.1, uN - 0.1]) loct(b, M.motorDark, F, h + 0.015, u - 0.035, u + 0.035, v, ay);
+  lcu(b, M.motorDark, F, h * 0.86, uDE + 0.01, uDE + 0.1, v, ay, 24);
+  lcu(b, M.motorDark, F, h * 0.86, uN - 0.1, uN - 0.01, v, ay, 24);
+  lcu(b, M.steelDark, F, 0.15, uDE - 0.05, uDE + 0.01, v, ay, 16);
+  lcu(b, M.steelDark, F, 0.07, uDE - 0.2, uDE - 0.05, v, ay, 12);
+  // tacho / encoder at NDE
+  lcu(b, M.steelDark, F, 0.12, uN - 0.01, uN + 0.08, v, ay, 16);
+  lcu(b, M.motorDark, F, 0.09, uN + 0.08, uN + 0.2, v, ay, 14);
+  // forced ventilation on top at the driving end: adapter, duct, scroll housing, fan motor, inlet filter
+  const ub = uDE + Math.min(0.42, L * 0.3), yt = ay + h;
+  lbox(b, M.motorDark, F, ub - 0.22, ub + 0.22, v - 0.25, v + 0.25, yt - 0.01, yt + 0.06);
+  lbox(b, M.motor, F, ub - 0.17, ub + 0.17, v - 0.19, v + 0.19, yt + 0.06, yt + 0.22);
+  lcv(b, M.motor, F, 0.25, ub, v - 0.15, v + 0.15, yt + 0.45, 22);
+  lcv(b, M.motorDark, F, 0.13, ub, v - tb * 0.15, v - tb * 0.46, yt + 0.45, 16);
+  lcv(b, M.motorDark, F, 0.1, ub, v - tb * 0.46, v - tb * 0.52, yt + 0.45, 14);
+  lcv(b, M.steelDark, F, 0.17, ub, v + tb * 0.15, v + tb * 0.23, yt + 0.45, 18);
+  lcv(b, M.guard, F, 0.172, ub, v + tb * 0.23, v + tb * 0.235, yt + 0.45, 18);
+  // terminal box with cable gland, louvres, lifting eyes
+  const ut = uDE + 0.48 * L;
+  lbox(b, M.motorDark, F, ut, ut + Math.min(0.48, L * 0.3), v + tb * (h - 0.01), v + tb * (h + 0.17), ay - 0.18, ay + 0.24);
+  lcy(b, M.steelDark, F, 0.04, ut + 0.12, v + tb * (h + 0.08), ay - 0.36, ay - 0.18, 8);
+  for (let k = 0; k < 3; k++) lbox(b, M.steelDark, F, uDE + 0.3 + k * 0.2, uDE + 0.42 + k * 0.2, v - tb * (h + 0.002), v - tb * (h + 0.015), ay - 0.22, ay + 0.18);
+  for (const u of [uDE + 0.2, uN - 0.25]) lbox(b, M.steelDark, F, u - 0.035, u + 0.035, v - 0.02, v + 0.02, yt, yt + 0.11);
+  return ay;
+}
+// large AC induction motor (box frame, air-to-air cooler on top, NDE blower, bearing pedestals) — roughing mill main drive
+function acMotor(b, F, uDE, L, v, ay, pad, o = {}) {
+  const w = o.w ?? 1.16, h = w / 2, uN = uDE + L, ch = o.cooler ?? 0.6, tb = o.tb ?? -1;
+  lbox(b, M.tableFrame, F, uDE - 0.35, uN + 0.35, v - h - 0.28, v + h + 0.28, pad, pad + 0.14);
+  lbox(b, M.motor, F, uDE + 0.18, uN - 0.18, v - h, v + h, pad + 0.14, ay + h * 0.55);
+  lcu(b, M.motor, F, h * 0.98, uDE + 0.18, uN - 0.18, v, ay, 32);
+  for (let u = uDE + 0.32; u < uN - 0.25; u += 0.3) lbox(b, M.motorDark, F, u - 0.02, u + 0.02, v - h - 0.015, v + h + 0.015, pad + 0.2, ay + h * 0.5);
+  for (const u of [uDE, uN - 0.18]) {
+    lbox(b, M.motorDark, F, u - 0.02, u + 0.2, v - 0.36, v + 0.36, pad + 0.14, ay - 0.22);                    // bearing pedestal
+    lcu(b, M.motorDark, F, 0.24, u, u + 0.18, v, ay, 22);
+  }
+  lcu(b, M.motorDark, F, h * 0.82, uDE + 0.12, uDE + 0.2, v, ay, 28);
+  lcu(b, M.motorDark, F, h * 0.82, uN - 0.2, uN - 0.12, v, ay, 28);
+  lcu(b, M.steelDark, F, 0.13, uDE - 0.3, uDE, v, ay, 16);
+  // air-to-air cooler with tube-bundle covers on top
+  lbox(b, M.motorDark, F, uDE + 0.26, uN - 0.26, v - h * 0.9, v + h * 0.9, ay + h * 0.55, ay + h + ch);
+  for (let u = uDE + 0.4; u < uN - 0.36; u += 0.24) lbox(b, M.steelDark, F, u - 0.015, u + 0.015, v - h * 0.91, v + h * 0.91, ay + h + 0.12, ay + h + ch - 0.06);
+  lbox(b, M.motor, F, uDE + 0.2, uN - 0.2, v - h * 0.94, v + h * 0.94, ay + h + ch, ay + h + ch + 0.05);
+  // NDE fan unit and terminal box
+  lbox(b, M.motor, F, uN + 0.12, uN + 0.9, v - 0.84, v + 0.36, pad + 0.14, ay + h * 0.6);
+  lcv(b, M.motorDark, F, 0.22, uN + 0.5, v + 0.36, v + 0.62, ay - 0.1, 18);
+  lbox(b, M.motorDark, F, uDE + 1.07, uDE + 1.52, v + tb * h, v + tb * (h + 0.28), ay - 0.4, ay + 0.15);
+}
+// gear coupling with a yellow guard
+function gearCoupling(b, F, u0, u1, v, y, r = 0.16) {
+  lcu(b, M.steelDark, F, r, u0 + 0.01, u1 - 0.01, v, y, 18);
+  lcu(b, M.steel, F, r * 1.2, (u0 + u1) / 2 - 0.03, (u0 + u1) / 2 + 0.03, v, y, 18);
+  const g = r + 0.07;
+  lbox(b, M.guard, F, u0 + 0.01, u1 - 0.01, v - g - 0.015, v - g, y - g, y + g);
+  lbox(b, M.guard, F, u0 + 0.01, u1 - 0.01, v + g, v + g + 0.015, y - g, y + g);
+  lbox(b, M.guard, F, u0 + 0.01, u1 - 0.01, v - g - 0.015, v + g + 0.015, y + g, y + g + 0.015);
+}
+// universal (cardan) spindle with flanges, joints, spline sleeve
+function cardan(b, F, u0, y0, u1, y1, v, R = 0.17) {
+  const P = (u, y) => FP(F, u, v, y), k = (t) => [u0 + (u1 - u0) * t, y0 + (y1 - y0) * t];
+  lcu(b, M.steelDark, F, R, u0, u0 + 0.08, v, y0, 18);
+  lcu(b, M.steelDark, F, R, u1 - 0.08, u1, v, y1, 18);
+  for (const t of [0.09, 0.91]) {
+    const [u, y] = k(t);
+    lbox(b, M.steel, F, u - 0.1, u + 0.1, v - R * 0.85, v + R * 0.85, y - R * 0.68, y + R * 0.68);
+    lcv(b, M.steelDark, F, R * 0.3, u, v - R * 1.05, v + R * 1.05, y, 10);
+  }
+  const [ua, ya] = k(0.15), [um, ym] = k(0.55), [ub, yb] = k(0.85);
+  pipe(b, M.steel, R * 0.6, P(ua, ya), P(um, ym), 14);
+  pipe(b, M.roll, R * 0.4, P(um, ym), P(ub, yb), 14);
+}
+// reducer / pinion stand: fabricated housing on a sole plate. parts: [[u0, u1, v0, v1, top, split?]];
+// outs: [[uFace, v, y]] shafts toward −u; ins: [[uFace, v, y]] input toward +u; caps: [[uFrom, uTo, v, y, r]]
+function gearBox(b, F, o) {
+  const parts = o.parts, base = o.base, fb = o.fb ?? 0.15, yb = base + fb, capR = o.capR ?? 0.19;
+  const U0 = Math.min(...parts.map((p) => p[0])), U1 = Math.max(...parts.map((p) => p[1]));
+  const V0 = Math.min(...parts.map((p) => p[2])), V1 = Math.max(...parts.map((p) => p[3]));
+  const top = Math.max(...parts.map((p) => p[4]));
+  lbox(b, M.tableFrame, F, U0 - 0.08, U1 + 0.08, (o.frame?.[0] ?? V0 - 0.12), (o.frame?.[1] ?? V1 + 0.12), base, yb);
+  for (const [uu, vv] of [[U0 - 0.04, (o.frame?.[0] ?? V0 - 0.12) + 0.05], [U1 + 0.04, (o.frame?.[0] ?? V0 - 0.12) + 0.05], [U0 - 0.04, (o.frame?.[1] ?? V1 + 0.12) - 0.05], [U1 + 0.04, (o.frame?.[1] ?? V1 + 0.12) - 0.05]])
+    lcy(b, M.steelDark, F, 0.028, uu, vv, yb, yb + 0.07, 6);
+  for (const p of parts) {
+    const [a0, a1, c0, c1, yt] = p, ys = Math.min(p[5] ?? o.split, yt - 0.08);
+    lbox(b, M.gear, F, a0, a1, c0, c1, yb, ys - 0.025);
+    lbox(b, M.gearDark, F, a0 - 0.035, a1 + 0.035, c0 - 0.035, c1 + 0.035, ys - 0.025, ys + 0.025);
+    lbox(b, M.gear, F, a0 + 0.012, a1 - 0.012, c0 + 0.012, c1 - 0.012, ys + 0.025, yt);
+    for (let vv = c0 + 0.17; vv < c1 - 0.08; vv += 0.33) for (const uu of [a0 - 0.012, a1 + 0.012]) lbox(b, M.gearDark, F, uu - 0.012, uu + 0.012, vv - 0.018, vv + 0.018, yb + 0.03, ys - 0.04);
+    for (let uu = a0 + 0.17; uu < a1 - 0.08; uu += 0.33) for (const vv of [c0 - 0.012, c1 + 0.012]) lbox(b, M.gearDark, F, uu - 0.018, uu + 0.018, vv - 0.012, vv + 0.012, yb + 0.03, ys - 0.04);
+    lbox(b, M.gearDark, F, (a0 + a1) / 2 - Math.min(0.18, (a1 - a0) / 3), (a0 + a1) / 2 + Math.min(0.18, (a1 - a0) / 3), (c0 + c1) / 2 - Math.min(0.24, (c1 - c0) / 3), (c0 + c1) / 2 + Math.min(0.24, (c1 - c0) / 3), yt, yt + 0.03);
+  }
+  for (const [uf, vv, yy] of o.outs ?? []) { lcu(b, M.gearDark, F, capR, uf - 0.07, uf, vv, yy, 20); lcu(b, M.steelDark, F, capR * 0.48, uf - 0.18, uf - 0.07, vv, yy, 14); }
+  for (const [uf, vv, yy] of o.ins ?? []) { lcu(b, M.gearDark, F, capR * 0.82, uf, uf + 0.06, vv, yy, 18); lcu(b, M.steelDark, F, 0.07, uf + 0.06, uf + 0.1, vv, yy, 12); }
+  for (const [ua, ub, vv, yy, rr] of o.caps ?? []) lcu(b, M.gearDark, F, rr ?? capR * 0.75, ua, ub, vv, yy, 18);
+  // breather, oil level gauge, lube oil supply from the central system and drain
+  lcy(b, M.steelDark, F, 0.03, U0 + 0.15, V0 + 0.15, top + 0.03, top + 0.16, 8);
+  lcy(b, M.white, F, 0.025, U1 + 0.03, V0 + 0.2, yb + 0.25, yb + 0.45, 8);
+  if (o.oil !== false) {
+    const pu = U1 + 0.12, pv = V1 - 0.12;
+    run(b, M.pipeOil, 0.028, [FP(F, pu, pv, 0.02), FP(F, pu, pv, top - 0.12), FP(F, pu - 0.13, pv, top - 0.12)], 8);
+    run(b, M.pipeOil, 0.045, [FP(F, U1 - 0.2, V1 + 0.03, yb + 0.12), FP(F, U1 - 0.2, V1 + 0.14, yb + 0.12), FP(F, U1 - 0.2, V1 + 0.14, 0.02)], 8);
+  }
+}
+// small helical geared motor (individually driven rollers): gear head at u, motor body further along +u
+function gearMotor(b, F, u, v, y, o = {}) {
+  const s = o.s ?? 1, gh = 0.15 * s, r = 0.11 * s, L = (o.L ?? 0.36) * s, um = u + gh + 0.05 * s;
+  lbox(b, M.gear, F, u - gh, u + gh, v - gh * 1.15, v + gh * 1.15, y - gh * 1.25, y + gh * 1.05);
+  lcu(b, M.gearDark, F, gh * 0.75, u - gh - 0.03 * s, u - gh, v, y, 14);
+  lcu(b, M.gear, F, gh * 0.95, u + gh, um, v, y, 16);
+  lcu(b, M.motor, F, r, um, um + L, v, y, 16);
+  for (let k = 1; k < 4; k++) lcu(b, M.motorDark, F, r * 1.05, um + (k * L) / 4 - 0.008, um + (k * L) / 4 + 0.008, v, y, 16);
+  lcu(b, M.motorDark, F, r * 1.02, um + L, um + L + 0.09 * s, v, y, 16);
+  lbox(b, M.motorDark, F, um + 0.05 * s, um + 0.2 * s, v - 0.06 * s, v + 0.06 * s, y + r - 0.01, y + r + 0.08 * s);
+  if (o.feet !== false) lbox(b, M.tableFrame, F, u - gh, u + gh, v - gh * 1.1, v + gh * 1.1, 0, y - gh * 1.25);
+}
+// TEFC AC motor along u (fins, fan cowl), feet on a base at height pad; DE at u0 faces −u
+function tefcMotor(b, F, u0, L, v, y, r, pad) {
+  lbox(b, M.motorDark, F, u0 + 0.06, u0 + L - 0.08, v - r * 0.85, v + r * 0.85, pad, y - r * 0.55);
+  lcu(b, M.motor, F, r, u0, u0 + L, v, y, 20);
+  for (let k = 1; k < 6; k++) lcu(b, M.motorDark, F, r * 1.04, u0 + (k * L) / 6 - 0.008, u0 + (k * L) / 6 + 0.008, v, y, 20);
+  lcu(b, M.motorDark, F, r * 1.02, u0 + L, u0 + L + 0.12, v, y, 20);
+  lcu(b, M.motorDark, F, r * 0.82, u0 - 0.04, u0, v, y, 18);
+  lbox(b, M.motorDark, F, u0 + L * 0.3, u0 + L * 0.6, v - r * 0.45, v + r * 0.45, y + r - 0.02, y + r + 0.12);
+}
+// group drive of a roller table: AC motor + V-belt + reducer 125 CRS on one base; output shaft toward −u at v = 0
+function groupDrive(b, F, u0, o = {}) {
+  const y = o.y ?? 0.62, mv = o.mv ?? 0.24, rv = o.rv ?? [-0.4, 0.0], ml = o.ml ?? 0.55, mr = o.mr ?? 0.16, D = o.depth ?? 0.98;
+  lbox(b, M.tableFrame, F, u0, u0 + D, Math.min(rv[0], mv - mr) - 0.06, Math.max(rv[1], mv + mr) + 0.06, 0, 0.1);
+  const ru1 = u0 + (o.rd ?? 0.36), rc = (rv[0] + rv[1]) / 2;
+  gearBox(b, F, { parts: [[u0 + 0.04, ru1, rv[0], rv[1], y + 0.24]], base: 0.1, fb: 0.06, split: y, capR: 0.11, oil: false,
+    outs: [[u0 + 0.04, rc, y]], ins: [[ru1, rc - 0.08, y - 0.12]] });
+  tefcMotor(b, F, ru1 + 0.12, ml, mv, y, mr, 0.1);
+  // belt guard between the reducer input pulley and the motor pulley
+  const ug = ru1 + 0.05, vMin = Math.min(rc - 0.08, mv) - 0.14, vMax = Math.max(rc - 0.08, mv) + 0.14;
+  lbox(b, M.guard, F, ug, ug + 0.07, vMin, vMax, y - 0.26, y + 0.16);
+  lcu(b, M.steelDark, F, 0.045, u0 - 0.12, u0 + 0.04, rc, y, 10);
+}
+
+// Roller table along X (axis='x') or along Z (axis='z').
+// o.motorSide ±1: individually driven rollers (helical geared motor per roller, every o.motorEvery-th roller);
+// o.rolls: explicit roller positions; o.drives: group drives [{ at, side, kind: 'unit' | 'gm', u0, mv, rv }];
+// o.lineShaft: { side, u } — line shaft with a bevel box at each roller.
 function rollerTable(b, a0, a1, c, w, o = {}) {
   const ax = o.axis ?? 'x', y = o.y ?? 0.88, pitch = o.pitch ?? 1.0, r = o.r ?? 0.13;
   const P = (u, v) => (ax === 'x' ? [u, v] : [v, u]);
+  const FR = (u, side) => (ax === 'x' ? { x: u, z: c, d: side > 0 ? '+z' : '-z' } : { x: c, z: u, d: side > 0 ? '+x' : '-x' });
   const lo = Math.min(a0, a1), hi = Math.max(a0, a1), len = hi - lo, mid = (lo + hi) / 2;
   for (const s of [-1, 1]) {
     const [cx, cz] = P(mid, c + s * (w / 2 + 0.06));
     if (ax === 'x') box(b, M.tableFrame, len, 0.36, 0.16, cx, y - 0.5, cz); else box(b, M.tableFrame, 0.16, 0.36, len, cx, y - 0.5, cz);
     for (let u = lo + 0.3; u <= hi; u += 2.5) { const [lx, lz] = P(u, c + s * (w / 2 + 0.06)); box(b, M.tableFrame, 0.18, y - 0.5, 0.18, lx, 0, lz); }
   }
-  let i = 0;
-  for (let u = lo + pitch / 2; u < hi; u += pitch, i++) {
+  const rolls = o.rolls ?? (() => { const a = []; for (let u = lo + pitch / 2; u < hi; u += pitch) a.push(u); return a; })();
+  rolls.forEach((u, i) => {
     const [rx, rz] = P(u, c);
-    cyl(b, M.roll, r, w - 0.08, ax === 'x' ? 'z' : 'x', rx, y, rz, 12);
+    cyl(b, M.roll, r, w - 0.08, ax === 'x' ? 'z' : 'x', rx, y, rz, 14);
+    for (const s of [-1, 1]) { const [bx, bz] = P(u, c + s * (w / 2 - 0.01)); box(b, M.machineDark, ax === 'x' ? 0.2 : 0.14, 0.2, ax === 'x' ? 0.14 : 0.2, bx, y - 0.14, bz); }
     if (o.motorSide && i % (o.motorEvery ?? 1) === 0) {
-      const [mx, mz] = P(u, c + o.motorSide * (w / 2 + 0.42));
-      if (ax === 'x') { box(b, M.motor, 0.3, 0.3, 0.46, mx, y - 0.32, mz); box(b, M.gear, 0.32, 0.28, 0.22, mx, y - 0.3, c + o.motorSide * (w / 2 + 0.16)); }
-      else { box(b, M.motor, 0.46, 0.3, 0.3, mx, y - 0.32, mz); box(b, M.gear, 0.22, 0.28, 0.32, c + o.motorSide * (w / 2 + 0.16), y - 0.3, mz); }
+      const F = FR(u, o.motorSide);
+      lcu(b, M.steelDark, F, 0.035, w / 2 + 0.05, w / 2 + 0.06, 0, y, 8);
+      gearMotor(b, F, w / 2 + 0.2, 0, y, { s: o.gm ?? 1 });
+    }
+    if (o.lineShaft) {
+      const F = FR(u, o.lineShaft.side), uu = o.lineShaft.u;
+      lbox(b, M.gear, F, uu - 0.12, uu + 0.12, -0.11, 0.11, y - 0.32, y + 0.04);
+      lcu(b, M.steelDark, F, 0.04, w / 2 - 0.02, uu - 0.12, 0, y, 8);
+    }
+  });
+  if (o.lineShaft) {
+    const s = o.lineShaft.side, [ga, gb] = [P(lo + 0.2, c + s * o.lineShaft.u), P(hi - 0.2, c + s * o.lineShaft.u)];
+    pipe(b, M.steelDark, 0.04, [ga[0], y - 0.2, ga[1]], [gb[0], y - 0.2, gb[1]], 8);
+  }
+  for (const d of o.drives ?? []) {
+    const F = FR(d.at, d.side);
+    if (d.kind === 'gm') {
+      // geared motor between two rollers, chain drives to both of them
+      gearMotor(b, F, d.u0 + 0.15, 0, y - 0.05, { s: 1.1 });
+      for (const dv of [-0.5, 0.5]) lbox(b, M.guard, F, w / 2 + 0.02, w / 2 + 0.08, Math.min(0, dv) - 0.08, Math.max(0, dv) + 0.08, y - 0.17, y + 0.1);
+    } else {
+      // mv / rv are given along +X (+Z for tables along Z); frames '+z' / '-x' run v the other way
+      const flip = F.d === '+z' || F.d === '-x', rv0 = d.rv ?? [-0.4, 0], rv = flip ? [-rv0[1], -rv0[0]] : rv0, mv = (flip ? -1 : 1) * (d.mv ?? 0.24);
+      groupDrive(b, F, d.u0, { mv, rv, y: d.y ?? y - 0.26, depth: d.depth, ml: d.ml, mr: d.mr, rd: d.rd });
+      lcu(b, M.steelDark, F, 0.045, w / 2 + 0.04, d.u0 - 0.1, (rv[0] + rv[1]) / 2, d.y ?? y - 0.26, 10);
     }
   }
   if (o.guides) for (const s of [-1, 1]) { const [gx, gz] = P(mid, c + s * (w / 2 - 0.12)); if (ax === 'x') box(b, M.steelDark, len, 0.12, 0.05, gx, y + r, gz); else box(b, M.steelDark, 0.05, 0.12, len, gx, y + r, gz); }
@@ -719,42 +943,76 @@ function motorZ(b, cx, cy, cz, r, len, mat = M.motor) {
   box(b, mat, r * 0.7, r * 0.55, r * 0.9, cx, cy + r * 0.85, cz + len * 0.15);
 }
 // 2-high stand with drive toward axis В (−Z): housing, rolls, spindles, gearbox, motor
+// 2-high shiftable stands C1–C16. Stand footprint per class from 527-101 r8 (u = distance from the rolling line
+// toward row В, v = along the line from the stand axis); drives per stand group from the same plan.
 const STAND_CLS = {
-  460: { hw: 1.95, hl: 2.6, hh: 2.75, r: 0.25, gz: 4.9, gb: [1.9, 1.55, 2.0], gbx: 0, mz: 6.8, mr: 0.42, ml: 1.5, my: 1.95 },
-  410: { hw: 1.85, hl: 2.5, hh: 2.6, r: 0.225, gz: 4.75, gb: [2.4, 1.6, 1.9], gbx: -0.1, mz: 6.65, mr: 0.4, ml: 1.6, my: 1.85 },
-  360: { hw: 1.7, hl: 2.3, hh: 2.45, r: 0.205, gz: 4.4, gb: [1.8, 1.45, 1.8], gbx: 0, mz: 5.9, mr: 0.36, ml: 1.3, my: 1.7 },
-  310: { hw: 1.55, hl: 2.1, hh: 2.3, r: 0.175, gz: 4.1, gb: [1.6, 1.35, 1.6], gbx: 0, mz: 5.5, mr: 0.33, ml: 1.2, my: 1.6 },
-  260: { hw: 1.3, hl: 1.9, hh: 2.1, r: 0.16, gz: 3.8, gb: [1.3, 1.2, 1.45], gbx: 0, mz: 5.0, mr: 0.3, ml: 1.1, my: 1.5 },
+  460: { hw: 1.7, hz: [-1.2, 0.9], r: 0.25, hh: 2.75, cw: 1.27 },
+  410: { hw: 1.7, hz: [-1.2, 0.9], r: 0.225, hh: 2.6, cw: 1.27 },
+  360: { hw: 1.28, hz: [-1.0, 0.7], r: 0.205, hh: 2.45, cw: 1.06 },
+  310: { hw: 1.2, hz: [-1.0, 0.9], r: 0.175, hh: 2.3, cw: 0.81 },
+  260: { hw: 1.14, hz: [-0.9, 0.8], r: 0.16, hh: 2.1, cw: 0.68 },
 };
-function millStand(b, xc, zc, S) {
-  box(b, M.plate, S.hw + 0.7, 0.22, S.hl + 1.0, xc, 0, zc);
-  const zs = [zc + (S.hl / 2 - 0.22), zc - (S.hl / 2 - 0.22)];
-  const yU = PASS + S.r + 0.03, yL = PASS - S.r - 0.03;
-  for (const z of zs) {
-    for (const s of [-1, 1]) box(b, M.machine, 0.36, S.hh - 0.22, 0.44, xc + s * (S.hw / 2 - 0.18), 0.22, z);
-    box(b, M.machine, S.hw, 0.38, 0.44, xc, S.hh - 0.38, z);
-    box(b, M.machine, S.hw, 0.28, 0.44, xc, 0.22, z);
-    box(b, M.machineDark, S.hw - 0.72, 0.42, 0.5, xc, yU - 0.2, z);
-    box(b, M.machineDark, S.hw - 0.72, 0.42, 0.5, xc, yL - 0.22, z);
-    cyl(b, M.machineDark, 0.11, 0.42, 'y', xc, S.hh + 0.2, z, 12);
-    cyl(b, M.guard, 0.07, 0.3, 'y', xc + 0.3, S.hh + 0.15, z, 8);
-    cyl(b, M.guard, 0.07, 0.3, 'y', xc - 0.3, S.hh + 0.15, z, 8);
+// parts: reducer housing blocks [u0, u1, v0, v1, top, split?]; mv: input (= motor) axis offset along the line;
+// m: motor body [DE, NDE]; pad: top of the motor pedestal; base: top of the reducer pad
+const DRV = {
+  A: { parts: [[4.15, 5.65, -0.75, 0.75, 1.75], [4.72, 5.65, -0.62, 0.62, 2.95, 2.5]], frame: [-0.975, 0.975], base: -0.155, mv: 0, m: [5.95, 7.5], pad: 1.895 },
+  B: { parts: [[3.9, 4.22, -0.478, 0.73, 1.55], [4.22, 5.3, -1.67, 0.756, 1.72]], base: -0.115, mv: -1.242, m: [5.7, 7.15], pad: 0.22 },
+  C: { parts: [[3.3, 4.35, -1.31, 0.71, 1.62]], base: 0, mv: -0.932, m: [4.72, 6.35], pad: 0.245 },
+  D: { parts: [[2.9, 3.9, -1.33, 0.71, 1.55]], base: 0, mv: -0.932, m: [4.3, 5.9], pad: 0.27 },
+  E: { parts: [[2.9, 3.85, -0.62, 0.85, 1.55]], base: 0, mv: 0.40, m: [4.2, 5.65], pad: 0.27 },
+  F: { parts: [[2.5, 3.3, -0.695, 0.454, 1.45]], base: 0, mv: -0.322, m: [3.75, 5.35], pad: 0.295 },
+  G: { parts: [[2.5, 3.3, -0.495, 0.514, 1.45]], base: 0, mv: 0, m: [3.85, 5.4], pad: 0.295 },
+};
+const STAND_DRV = { C1: 'A', C2: 'A', C3: 'B', C4: 'B', C5: 'C', C6: 'C', C7: 'D', C8: 'D', C9: 'E', C10: 'E', C11: 'F', C12: 'G', C13: 'G', C14: 'G', C15: 'G', C16: 'G' };
+
+function millStand(b, xc, cls, D) {
+  const S = STAND_CLS[cls], F = { x: xc, z: LINE_Z, d: '-z' };
+  const yU = PASS + S.r + 0.012, yL = PASS - S.r - 0.012, [h0, h1] = S.hz;
+  // sole plate, shifting base with rails
+  lbox(b, M.plate, F, h0, h1, -S.hw / 2 - 0.35, S.hw / 2 + 0.35, 0, 0.12);
+  lbox(b, M.tableFrame, F, h0 + 0.1, h1 - 0.05, -S.hw / 2 - 0.15, S.hw / 2 + 0.15, 0.12, 0.26);
+  for (const s of [-1, 1]) lbox(b, M.rail, F, h0 + 0.15, h1 - 0.1, s * (S.hw / 2 - 0.1) - 0.05, s * (S.hw / 2 - 0.1) + 0.05, 0.26, 0.32);
+  // housings (operator and drive side): posts, cap, foot, chocks, chock clamps, screw-down nut boxes, balance springs
+  const tH = 0.38, hs = [[h0 + 0.25, h0 + 0.25 + tH], [h1 - tH, h1]];
+  for (const [a0, a1] of hs) {
+    for (const s of [-1, 1]) lbox(b, M.machine, F, a0, a1, s * S.hw / 2 - s * 0.34, s * S.hw / 2, 0.32, S.hh);
+    lbox(b, M.machine, F, a0, a1, -S.hw / 2, S.hw / 2, S.hh - 0.36, S.hh);
+    lbox(b, M.machine, F, a0, a1, -S.hw / 2, S.hw / 2, 0.32, 0.56);
+    for (const y of [yU, yL]) lbox(b, M.machineDark, F, a0 - 0.03, a1 + 0.03, -S.hw / 2 + 0.34, S.hw / 2 - 0.34, y - S.r * 0.9, y + S.r * 0.9);
+    for (const s of [-1, 1]) lbox(b, M.machineDark, F, (a0 + a1) / 2 - 0.12, (a0 + a1) / 2 + 0.12, s * S.hw / 2, s * (S.cw - 0.05), PASS - 0.3, PASS + 0.2);
+    lcy(b, M.machineDark, F, 0.12, (a0 + a1) / 2, 0, S.hh, S.hh + 0.36, 14);
+    for (const s of [-1, 1]) lcy(b, M.guard, F, 0.07, (a0 + a1) / 2, s * 0.32, S.hh, S.hh + 0.3, 10);
   }
-  cyl(b, M.roll, S.r, S.hl + 0.25, 'z', xc, yU, zc, 22);
-  cyl(b, M.roll, S.r, S.hl + 0.25, 'z', xc, yL, zc, 22);
-  for (const s of [-1, 1]) box(b, M.steelDark, 0.55, 0.2, 0.32, xc + s * (S.hw / 2 + 0.3), PASS - 0.14, LINE_Z);
-  const zg = zc - S.gz, zm = zc - S.mz;
-  const zFace = zc - S.hl / 2 - 0.1, zGb = zg + S.gb[1] / 2;
+  // screw-down: worm shaft between the housings, worm box and hydraulic motor (pos. 9) on the drive side
+  lcu(b, M.steelDark, F, 0.055, hs[0][0], hs[1][1] + 0.1, 0, S.hh + 0.22, 10);
+  lbox(b, M.gear, F, hs[1][1] + 0.02, hs[1][1] + 0.32, -0.17, 0.17, S.hh + 0.05, S.hh + 0.4);
+  lcu(b, M.motor, F, 0.09, hs[1][1] + 0.32, hs[1][1] + 0.58, 0, S.hh + 0.22, 12);
+  // rolls with wobbler ends on the drive side
   for (const y of [yU, yL]) {
-    cyl(b, M.steelDark, 0.085, zFace - zGb, 'z', xc, y, (zFace + zGb) / 2, 10);
-    cyl(b, M.steelDark, 0.17, 0.26, 'z', xc, y, zFace - 0.13, 14);
-    cyl(b, M.steelDark, 0.17, 0.26, 'z', xc, y, zGb + 0.13, 14);
+    lcu(b, M.roll, F, S.r, hs[0][0] - 0.12, hs[1][1] + 0.12, 0, y, 26);
+    lcu(b, M.steelDark, F, S.r * 0.45, hs[1][1] + 0.12, hs[1][1] + 0.3, 0, y, 14);
   }
-  box(b, M.plate, S.gb[0] + 0.3, 0.18, S.gb[1] + 0.3, xc + S.gbx, 0, zg);
-  box(b, M.gear, S.gb[0], S.gb[2], S.gb[1], xc + S.gbx, 0.18, zg);
-  box(b, M.gear, S.gb[0] * 0.55, 0.14, S.gb[1] * 0.8, xc + S.gbx, 0.18 + S.gb[2], zg);
-  cyl(b, M.steelDark, 0.12, zg - S.gb[1] / 2 - (zm + S.ml / 2), 'z', xc, S.my, ((zg - S.gb[1] / 2) + (zm + S.ml / 2)) / 2, 10);
-  motorZ(b, xc, S.my, zm, S.mr, S.ml);
+  // shifting cylinder (pos. 10) along the roll axis on the drive side
+  const cyEnd = Math.min(D.parts[0][0] - 0.4, h1 + 1.9);
+  lcu(b, M.machine, F, 0.09, h1 - 0.2, cyEnd - 0.45, S.hw / 2 - 0.12, 0.42, 12);
+  lcu(b, M.roll, F, 0.04, cyEnd - 0.45, cyEnd, S.hw / 2 - 0.12, 0.42, 8);
+  lbox(b, M.tableFrame, F, cyEnd - 0.05, cyEnd + 0.22, S.hw / 2 - 0.34, S.hw / 2 + 0.1, 0, 0.62);
+  // spindle carrier + cardan spindles to the pinion-stand outputs (pinion centres = nominal roll diameter)
+  const pc = cls / 2000, gU = PASS + pc, gL = PASS - pc, g0 = D.parts[0][0], R = cls >= 410 ? 0.2 : cls >= 310 ? 0.17 : 0.15;
+  lbox(b, M.tableFrame, F, h1 + 0.26, h1 + 0.5, -0.45, 0.45, 0, PASS - 0.55);
+  lbox(b, M.machineDark, F, h1 + 0.28, h1 + 0.46, -0.36, 0.36, PASS - 0.55, PASS + 0.6);
+  cardan(b, F, h1 + 0.32, yU, g0 - 0.18, gU, 0, R);
+  cardan(b, F, h1 + 0.32, yL, g0 - 0.18, gL, 0, R);
+  // motor first (its shaft height sets the reducer input), then the reducer-cum-pinion stand and the gear coupling
+  if (D.pad > 0.05) lbox(b, M.concrete, F, D.m[0] + 0.02, D.m[1] - 0.02, D.mv - 0.47, D.mv + 0.47, 0, D.pad - 0.012);
+  const ay = dcMotor(b, F, D.m[0], D.m[1] - D.m[0], D.mv, D.pad, { tb: 1 });
+  const g1 = Math.max(...D.parts.map((p) => p[1]));
+  const uFront = (v) => Math.min(...D.parts.filter((p) => p[2] <= v && v <= p[3]).map((p) => p[0]));
+  const caps = D.mv ? [[uFront(D.mv) - 0.06, uFront(D.mv), D.mv, ay, 0.15]] : [];
+  if (Math.abs(D.mv) > 0.6) caps.push([g1, g1 + 0.05, D.mv / 2, (ay + gU) / 2 + 0.1, 0.15], [uFront(D.mv / 2) - 0.05, uFront(D.mv / 2), D.mv / 2, (ay + gU) / 2 + 0.1, 0.15]);
+  gearBox(b, F, { parts: D.parts, base: D.base, split: gU, frame: D.frame, capR: cls >= 410 ? 0.22 : 0.19,
+    outs: [[g0, 0, gU], [g0, 0, gL]], ins: [[g1, D.mv, ay]], caps });
+  gearCoupling(b, F, g1 + 0.06, D.m[0] - 0.05, D.mv, ay, 0.15);
 }
 
 // ---------------------------------------------------------------------------
@@ -976,25 +1234,6 @@ const underlayMats = [];
 // -05 R0 (combustion air), -06 R0 (gas); placed by the GA dims: furnace CL on axis 3,
 // discharge window on the discharge-table line, chimney 3,3 m past axis 1, 11 018 from row Б
 // ---------------------------------------------------------------------------
-// pipe between two points; run = polyline with elbows (spheres) at the joints
-const _qp = new THREE.Quaternion(), _up = new THREE.Vector3(0, 1, 0);
-function pipe(b, mat, r, a, c, seg = 12, rEnd) {
-  const p1 = new THREE.Vector3(...a), p2 = new THREE.Vector3(...c), len = p1.distanceTo(p2);
-  if (len < 1e-4) return;
-  const g = new THREE.CylinderGeometry(rEnd ?? r, r, len, seg);
-  _qp.setFromUnitVectors(_up, p2.clone().sub(p1).normalize());
-  g.applyQuaternion(_qp);
-  g.translate((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
-  return b.add(g, mat);
-}
-function elbow(b, mat, r, p, seg = 12) { const g = new THREE.SphereGeometry(r, seg, Math.max(6, seg >> 1)); g.translate(...p); return b.add(g, mat); }
-function run(b, mat, r, pts, seg = 12) { for (let i = 1; i < pts.length; i++) { pipe(b, mat, r, pts[i - 1], pts[i], seg); if (i < pts.length - 1) elbow(b, mat, r, pts[i], seg); } }
-// square frustum (hoppers, transitions): half-sizes at bottom (y0) and top (y1)
-function frustum(b, mat, cx, cz, y0, y1, h0, h1) {
-  const g = new THREE.CylinderGeometry(h1 * Math.SQRT2, h0 * Math.SQRT2, y1 - y0, 4, 1);
-  g.rotateY(Math.PI / 4); g.translate(cx, (y0 + y1) / 2, cz);
-  return b.add(g, mat);
-}
 M.insul = std(0x9d907d, { r: 0.95, m: 0.0 });
 M.hotAir = std(0xc3cad1, { r: 0.35, m: 0.6 });
 
@@ -1241,48 +1480,80 @@ make('chainHot', 6, { facts: ['Три цепи: передаёт горячую 
 // ---------------------------------------------------------------------------
 // ROUGHING GROUP (527-206p1, 527-231p1, 527-209p1)
 // ---------------------------------------------------------------------------
-const RT_Z = Z(-702070);
-make('workExt', 7, { facts: ['Принимает заготовку с цепного перекладывателя'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2034000), X(2041500), RT_Z, 1.58, { motorSide: -1, motorEvery: 2, guides: true, pitch: 7.5 / 6, r: 0.122 }), equipRoot);
-make('workTable', 8, { facts: ['Рабочий рольганг перед черновой клетью', '21 ролик Ø244 × 1500 мм'], dwg: '527-206p1sh01' }, (b) => rollerTable(b, X(2041500), X(2062100), RT_Z, 1.58, { motorSide: -1, motorEvery: 5, guides: true, pitch: 20.6 / 21, r: 0.122 }), equipRoot);
+const RT_Z = Z(-702188);   // work roller table: rollers Ø244 × 1500, y −703139…−701238 on 527-101
+const ROLLS = (x0, n, p = 1000) => Array.from({ length: n }, (_, k) => X(x0 + k * p));
+make('workExt', 7, { facts: ['Принимает заготовку с цепного перекладывателя', '6 роликов Ø244 × 1500 мм с шагом 1 м', 'Мотор-редукторы 4 кВт — 3 шт., каждый на два ролика через цепные передачи'], dwg: '527-206p1sh01 · план 527-101sh01 r8' },
+  (b) => rollerTable(b, X(2035300), X(2041400), RT_Z, 1.58, { rolls: ROLLS(2035861, 6), r: 0.122, guides: true, drives: [2036366, 2038366, 2040366].map((x) => ({ at: X(x), side: -1, kind: 'gm', u0: 0.86 })) }), equipRoot);
+make('workTable', 8, { facts: ['Рабочий рольганг перед черновой клетью', '21 ролик Ø244 × 1500 мм с шагом 1 м', 'Групповой привод: 4 узла «двигатель 11 кВт — клиноремённая передача — редуктор 125 CRS» со стороны ряда В'], dwg: '527-206p1sh01 · план 527-101sh01 r8' },
+  (b) => rollerTable(b, X(2041400), X(2062300), RT_Z, 1.58, { rolls: ROLLS(2041861, 21), r: 0.122, guides: true, drives: [2043507, 2049507, 2055507, 2058507].map((x) => ({ at: X(x), side: -1, u0: 0.86, mv: 0.24, rv: [-0.4, 0] })) }), equipRoot);
 make('rough', 9, {
-  facts: ['Валки Ø680…590 × 1600 мм, подшипники SRB 24072', 'Привод: AC 1119 кВт, 739 об/мин; маховик 7 т', 'Редуктор 1360 CRS, i = 12,258; шестерённая клеть трио 610 CRS', 'Ось среднего валка +1,345'],
-  dwg: '527-231p1sh01 r1 (06.06.24) · фундамент 527-300sh01/02', ly: 3.9,
+  facts: ['Валки Ø680…590 × 1600 мм, подшипники SRB 24072', 'Привод: AC 1119 кВт, 739 об/мин; маховик 7 т', 'Редуктор 1360 CRS, i = 12,258; шестерённая клеть трио 610 CRS', 'Ось среднего валка +1,345',
+    'По плану 527-101 r8: середина бочки в 0,66 м от оси прокатки к ряду В; ось двигателя и маховика смещена на 1360 мм к оси 1 (межосевое редуктора)'],
+  dwg: '527-231p1sh01 r1 (06.06.24) · план 527-101sh01 r8 · фундамент 527-300sh01/02', ly: 3.9,
 }, (b) => {
-  const xc = X(2063690), zc = Z(-702200);
-  box(b, M.plate, 3.4, 0.25, 3.6, xc, 0, zc);
-  for (const z of [zc + 1.25, zc - 1.25]) {
-    for (const s of [-1, 1]) box(b, M.machine, 0.5, 3.35, 0.55, xc + s * 1.0, 0.25, z);
-    box(b, M.machine, 2.5, 0.5, 0.55, xc, 3.1, z);
-    for (const y of [0.665, 1.345, 2.025]) box(b, M.machineDark, 1.5, 0.5, 0.62, xc, y - 0.25, z);
-    cyl(b, M.machineDark, 0.14, 0.5, 'y', xc, 3.85, z, 12);
+  const F = { x: X(2063741.5), z: LINE_Z, d: '-z' }, Fm = { x: X(2062381.5), z: LINE_Z, d: '-z' };
+  const yR = [0.665, 1.345, 2.025], yM = 1.345, uc = 0.66, hU = [-0.55, 1.87];
+  // sole plate and two closed-top housings (posts ±1,0 m, 0,6 m thick)
+  lbox(b, M.plate, F, -0.95, 2.3, -1.45, 1.45, 0, 0.22);
+  for (const u of hU) {
+    const a0 = u - 0.3, a1 = u + 0.3;
+    for (const s of [-1, 1]) lbox(b, M.machine, F, a0, a1, s * 0.75, s * 1.25, 0.22, 3.6);
+    lbox(b, M.machine, F, a0, a1, -1.25, 1.25, 3.1, 3.6);
+    lbox(b, M.machine, F, a0, a1, -1.25, 1.25, 0.22, 0.42);
+    for (const y of yR) lbox(b, M.machineDark, F, a0 - 0.04, a1 + 0.04, -0.74, 0.74, y - 0.27, y + 0.27);
+    lcy(b, M.machineDark, F, 0.15, u, 0, 3.6, 4.05, 16);
+    for (const s of [-1, 1]) lcy(b, M.guard, F, 0.08, u, s * 0.45, 3.6, 3.95, 10);
+    lbox(b, M.gear, F, u - 0.24, u + 0.24, 0.24, 0.62, 3.6, 3.98);
+    lcv(b, M.motor, F, 0.1, u, 0.62, 0.9, 3.79, 12);
   }
-  for (const y of [0.665, 1.345, 2.025]) cyl(b, M.roll, 0.34, 3.2, 'z', xc, y, zc, 24);
-  const zP = Z(-697375);
-  for (const y of [0.85, 1.345, 1.84]) { cyl(b, M.steelDark, 0.12, zc - 1.6 - (zP + 1.0), 'z', xc, y, (zc - 1.6 + zP + 1.0) / 2, 10); cyl(b, M.steelDark, 0.24, 0.35, 'z', xc, y, zc - 1.7, 14); }
-  box(b, M.gear, 2.8, 2.6, 1.9, xc, 0.15, zP);
-  boxMM(b, M.gear, X(2061800), 0.15, Z(-694540), X(2064600), 2.4, Z(-695870));
-  cyl(b, M.steelDark, 0.12, 1.2, 'z', xc, 1.3, (zP + Z(-695870)) / 2, 10);
-  cyl(b, M.machineDark, 1.06, 0.38, 'z', X(2062330), 1.12, Z(-693350), 32);
-  cyl(b, M.steelDark, 0.12, 4.0, 'z', X(2062330), 1.12, Z(-692700), 10);
-  for (const zz of [Z(-692580), Z(-694000)]) box(b, M.gear, 0.7, 1.0, 0.5, X(2062330), 0.1, zz);
-  boxMM(b, M.motor, X(2061660), 0.1, Z(-689780), X(2063060), 1.95, Z(-691950));
-  cyl(b, M.motor, 0.75, 2.1, 'z', X(2062360), 1.2, Z(-690870), 24);
+  // rolls Ø680…590 × 1600 with necks in the chocks
+  for (const y of yR) { lcu(b, M.roll, F, 0.34, uc - 0.8, uc + 0.8, 0, y, 28); lcu(b, M.steelDark, F, 0.2, hU[0] - 0.32, hU[1] + 0.45, 0, y, 16); }
+  // universal spindles (up to 8°) to the trio pinion stand 610 CRS (pinion centres 610 mm)
+  const p0 = 4.43, p1 = 6.7, yP = [yM - 0.61, yM, yM + 0.61];
+  lbox(b, M.tableFrame, F, 2.75, 3.05, -0.55, 0.55, 0, 0.42);
+  for (let i = 0; i < 3; i++) cardan(b, F, 2.25, yR[i], p0 - 0.15, yP[i], 0, 0.24);
+  gearBox(b, F, { parts: [[p0, p1, -1.25, 1.25, 2.45]], frame: [-1.42, 1.42], base: 0, split: yM, capR: 0.27,
+    outs: yP.map((y) => [p0, 0, y]), ins: [[p1, 0, yM]], caps: [[p1, p1 + 0.06, 0, yP[0], 0.22], [p1, p1 + 0.06, 0, yP[2], 0.22]] });
+  gearCoupling(b, F, p1 + 0.06, 7.0, 0, yM, 0.26);
+  // reducer 1360 CRS: output on the stand axis, input on the motor axis 1360 mm toward axis 1
+  gearBox(b, F, { parts: [[7.02, 8.44, -1.94, 0.95, 2.35]], base: 0, split: yM, capR: 0.3,
+    outs: [[7.02, 0, yM]], ins: [[8.44, -1.36, yM]], caps: [[6.96, 7.02, -1.36, yM, 0.26], [8.44, 8.5, 0, yM, 0.28]] });
+  // coupling → flywheel (7 t, Ø2,1 m) between two pedestal bearings → coupling → AC motor 1119 kW
+  gearCoupling(b, Fm, 8.5, 8.86, 0, yM, 0.24);
+  for (const [ua, ub] of [[9.02, 9.34], [10.12, 10.44]]) {
+    lbox(b, M.tableFrame, Fm, ua - 0.08, ub + 0.08, -0.62, 0.62, 0, 0.25);
+    lbox(b, M.machineDark, Fm, ua, ub, -0.4, 0.4, 0.25, yM - 0.1);
+    lcu(b, M.machineDark, Fm, 0.25, ua, ub, 0, yM, 18);
+    lbox(b, M.machineDark, Fm, ua + 0.02, ub - 0.02, -0.3, 0.3, yM - 0.1, yM + 0.2);
+  }
+  lcu(b, M.steelDark, Fm, 0.15, 8.86, 10.62, 0, yM, 16);
+  lcu(b, M.machineDark, Fm, 1.06, 9.52, 9.9, 0, yM, 44);
+  lcu(b, M.steel, Fm, 0.55, 9.46, 9.96, 0, yM, 28);
+  lbox(b, M.guard, Fm, 9.42, 10.0, -1.2, -1.16, 0.25, yM + 1.16);
+  lbox(b, M.guard, Fm, 9.42, 10.0, 1.16, 1.2, 0.25, yM + 1.16);
+  lbox(b, M.guard, Fm, 9.42, 10.0, -1.2, 1.2, yM + 1.16, yM + 1.2);
+  gearCoupling(b, Fm, 10.62, 10.98, 0, yM, 0.24);
+  lbox(b, M.concrete, Fm, 10.6, 13.88, -1.25, 0.64, 0, 0.17);
+  acMotor(b, Fm, 10.98, 2.12, 0, yM, 0.18, { w: 1.16, cooler: 0.6, tb: -1 });
 }, equipRoot);
-make('yTable', 10, { facts: ['Распределяет раскат по калибрам верхней и нижней линий клети трио'], dwg: '527-209p1sh01' }, (b) => {
-  rollerTable(b, X(2064917), X(2068320), Z(-702090), 3.4, { motorSide: -1, pitch: 0.55, r: 0.15 });
-  box(b, M.machineDark, 0.6, 1.8, 0.6, X(2066600), 0, Z(-704000));
+make('yTable', 10, { facts: ['Распределяет раскат по калибрам верхней и нижней линий клети трио', 'Привод: 2 узла «двигатель 11 кВт — ремень — редуктор 125 CRS», по одному с каждой стороны'], dwg: '527-209p1sh01 · план 527-101sh01 r8' }, (b) => {
+  rollerTable(b, X(2064900), X(2067950), Z(-702073), 1.95, { rolls: ROLLS(2065100, 5, 650), r: 0.15,
+    drives: [{ at: X(2066500), side: -1, u0: 1.1, mv: 0.24, rv: [-0.4, 0] }, { at: X(2066200), side: 1, u0: 1.28, mv: 0.24, rv: [-0.4, 0] }] });
 }, equipRoot);
-make('yExt', 11, { facts: ['Удлинитель Y-рольганга для обратных проходов'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068129), X(2087805), Z(-701550), 1.18, { motorSide: -1, motorEvery: 5, pitch: 19.676 / 20, r: 0.122 }), equipRoot);
-make('approach', 12, { facts: ['Подаёт раскат от черновой клети к клети C1', 'Длина ≈ 38 м'], dwg: '527-209p1sh01' }, (b) => rollerTable(b, X(2068316), X(2106100), Z(-703470), 0.28, { motorSide: 1, motorEvery: 9, y: 0.92, pitch: 37.784 / 26, r: 0.0885 }), equipRoot);
+make('yExt', 11, { facts: ['Удлинитель Y-рольганга для обратных проходов', 'Ролики Ø244 × 1100 с шагом 1 м', 'Групповой привод: 4 узла «двигатель 11 кВт — ремень — редуктор 125 CRS» со стороны ряда В'], dwg: '527-209p1sh01 · план 527-101sh01 r8' },
+  (b) => rollerTable(b, X(2068129), X(2087805), Z(-701973), 1.18, { rolls: ROLLS(2068520, 20), r: 0.122, drives: [2070105, 2075105, 2079105, 2085105].map((x) => ({ at: X(x), side: -1, u0: 0.7, mv: 0.24, rv: [-0.4, 0] })) }), equipRoot);
+make('approach', 12, { facts: ['Подаёт раскат от черновой клети к клети C1, ≈ 38 м', 'Ролики Ø177 × 200 — 26 шт. с шагом 1,5 м, по оси прокатки', 'Трансмиссионный вал с коническими редукторами на каждом ролике; 3 узла «двигатель 5,5 кВт — ремень — редуктор 125 CRS» со стороны ряда А'], dwg: '527-209p1sh01 · план 527-101sh01 r8' },
+  (b) => rollerTable(b, X(2068316), X(2106188), LINE_Z, 0.28, { rolls: ROLLS(2068421, 26, 1500), r: 0.0885, y: 0.92, lineShaft: { side: 1, u: 0.33 },
+    drives: [2079966, 2090466, 2100966].map((x) => ({ at: X(x), side: 1, u0: 0.47, mv: -0.41, rv: [-0.3, 0.27], depth: 0.78, rd: 0.22, ml: 0.42, mr: 0.14, y: 0.6 })) }), equipRoot);
 
 // ---------------------------------------------------------------------------
 // INTERMEDIATE + FINISHING STANDS C1–C16 (527-315…319p1)
 // ---------------------------------------------------------------------------
-const STANDS = [
-  ['C1', 13, 460, 2107342], ['C2', 13, 460, 2110542], ['C3', 15, 410, 2118541], ['C4', 15, 410, 2121241],
-  ['C5', 16, 360, 2125095], ['C6', 16, 360, 2127345], ['C7', 17, 310, 2131235], ['C8', 17, 310, 2133485],
-  ['C9', 17, 310, 2143757], ['C10', 17, 310, 2145757], ['C11', 19, 260, 2149734], ['C12', 19, 260, 2151241],
-  ['C13', 19, 260, 2155241], ['C14', 19, 260, 2156741], ['C15', 19, 260, 2160741], ['C16', 19, 260, 2162241],
+const STANDS = [   // stand axes from 527-101 r8 (symmetry of housings and spindles)
+  ['C1', 13, 460, 2107341.5], ['C2', 13, 460, 2110541.5], ['C3', 15, 410, 2118541.5], ['C4', 15, 410, 2121241.5],
+  ['C5', 16, 360, 2125241.5], ['C6', 16, 360, 2127491.5], ['C7', 17, 310, 2131491.5], ['C8', 17, 310, 2133741.5],
+  ['C9', 17, 310, 2143741.5], ['C10', 17, 310, 2145741.5], ['C11', 19, 260, 2149741.5], ['C12', 19, 260, 2151241.5],
+  ['C13', 19, 260, 2155241.5], ['C14', 19, 260, 2156741.5], ['C15', 19, 260, 2160741.5], ['C16', 19, 260, 2162241.5],
 ];
 const STAND_FACTS = {
   460: ['Валки Ø510…450 × 800 мм, подшипники SRB 24052', 'Привод: DC 300 кВт, 0–1000–2000 об/мин', 'Редуктор-шестерённая клеть 1240 CRS, i = 33,96', 'Ось прокатки +1,000; гидравлическая сдвижка клети'],
@@ -1293,26 +1564,99 @@ const STAND_FACTS = {
 };
 const STAND_DWG = { 460: '527-315p1sh01 r1', 410: '527-316p1sh01 r2', 360: '527-317p1sh01 r1', 310: '527-318p1sh01/sh02 r1', 260: '527-319p1sh01/02/03 r1' };
 for (const [id, no, cls, xw] of STANDS) {
-  const S = STAND_CLS[cls];
   make('stand' + id, no, {
     title: `Клеть ${id} — дуо ${cls} мм`, en: `${cls} mm 2HI Shiftable Mill Stand · ${id}`,
     facts: STAND_FACTS[cls], dwg: STAND_DWG[cls] + (cls >= 310 && ['C1','C2','C3','C4','C5','C6','C7','C8'].includes(id) ? ' · фундамент 527-400sh01–03 r3' : ' · фундамент 527-402sh01–03'),
-  }, (b) => millStand(b, X(xw), LINE_Z, S), equipRoot, `${String(no).padStart(2, '0')}·${id}`);
+  }, (b) => millStand(b, X(xw), cls, DRV[STAND_DRV[id]]), equipRoot, `${String(no).padStart(2, '0')}·${id}`);
 }
 // inter-stand guide troughs along the line
 make('lineGuides', null, { title: 'Межклетевые проводки и жёлоба', en: 'Inter-stand guides', facts: ['Направляющие проводки между клетями по оси прокатки'], dwg: '527-101sh01 r8', label: false }, (b) => {
   const xs = STANDS.map((s) => X(s[3]));
   for (let i = 0; i < xs.length - 1; i++) { const a = xs[i] + 1.1, c = xs[i + 1] - 1.1; if (c - a > 0.3) { box(b, M.steelDark, c - a, 0.12, 0.34, (a + c) / 2, PASS - 0.2, LINE_Z); for (let x = a + 0.4; x < c; x += 1.2) box(b, M.tableFrame, 0.12, PASS - 0.2, 0.12, x, 0, LINE_Z); } }
 }, equipRoot);
-for (const [k, xa, xb, xc] of [['shear1', 2112591, 2114196, 2113400], ['shear2', 2136290, 2137895, 2137100]]) {
-  make(k, 14, { title: k === 'shear1' ? 'Ножницы 610 CRS между C2 и C3' : 'Ножницы 610 CRS между C8 и C9', facts: ['Обрезка переднего конца и аварийная резка раската', 'Карман и система уборки обрези в сторону оси А'], dwg: k === 'shear1' ? '527-257p1sh01 r1 · 527-257p1sh03' : '527-257p1sh02 r1 · 527-257p1sh04' }, (b) => {
-    const x0 = X(xa), x1 = X(xb), cx = X(xc);
-    boxMM(b, M.machine, x0, 0, LINE_Z + 0.2, x1, 2.2, Z(-701300));
-    cyl(b, M.machineDark, 0.62, 0.3, 'z', cx, 1.4, Z(-700700), 24);
-    box(b, M.motor, 0.7, 0.7, 1.2, cx, 0.9, Z(-700100));
-    boxMM(b, M.steelDark, x0 + 0.2, 0, LINE_Z + 0.5, X(xa + 4000), 1.0, Z(-705000));
-    boxMM(b, M.guard, x0 + 0.3, 1.0, LINE_Z + 0.6, X(xa + 3800), 1.05, Z(-704900));
-  }, equipRoot);
+// ---------------------------------------------------------------------------
+// Shears and pinch rolls of the main line — drive layout from 527-101 r8 (u from the rolling line toward row В)
+// ---------------------------------------------------------------------------
+// 610 CRS crank crop & cobble shear: gear housing on the drive side, cranks cantilevered over the line, DC 175 kW
+function cropShear(b, F) {
+  lbox(b, M.plate, F, -0.3, 1.0, -0.8, 0.85, 0, 0.1);
+  lbox(b, M.concrete, F, 1.14, 2.6, -0.62, 0.12, 0, 0.29);
+  const ay = dcMotor(b, F, 1.12, 1.5, -0.25, 0.3, { w: 0.7 });
+  gearBox(b, F, { parts: [[0.12, 0.88, -0.7, 0.75, 1.85]], base: 0.1, fb: 0.08, split: 1.305, capR: 0.2,
+    ins: [[0.88, -0.25, ay]], caps: [[0.06, 0.12, 0, 1.305, 0.25], [0.06, 0.12, 0, 0.695, 0.25], [0.88, 0.93, 0, 1.305, 0.2]] });
+  for (const y of [1.305, 0.695]) lcu(b, M.machineDark, F, 0.21, -0.22, 0.06, 0, y, 22);
+  lbox(b, M.steel, F, -0.2, 0.04, -0.12, 0.12, 1.06, 1.2);
+  lbox(b, M.steel, F, -0.2, 0.04, -0.12, 0.12, 0.8, 0.94);
+  gearCoupling(b, F, 0.94, 1.08, -0.25, ay, 0.14);
+  // cobble guard / chute along the line toward row A, scrap bucket
+  lbox(b, M.steelDark, F, -0.55, -0.06, -0.65, 2.75, 0.3, 0.86);
+  lbox(b, M.guard, F, -0.56, -0.05, -0.66, 2.76, 0.86, 0.875);
+  beam(b, M.steelDark, ...FP(F, -0.4, 0.45, 0.84), ...FP(F, -0.95, 0.45, 0.62), 1.05, 0.03);
+  lbox(b, M.steelDark, F, -1.95, -0.85, -0.1, 1.0, 0, 0.05);
+  for (const [a0, a1, c0, c1] of [[-1.95, -1.91, -0.1, 1.0], [-0.89, -0.85, -0.1, 1.0], [-1.95, -0.85, -0.1, -0.06], [-1.95, -0.85, 0.96, 1.0]]) lbox(b, M.steelDark, F, a0, a1, c0, c1, 0.05, 0.6);
+  lbox(b, M.dull, F, -1.88, -0.92, -0.03, 0.93, 0.05, 0.22);
+  for (const [v0, v1] of [[-0.22, -0.1], [1.0, 1.12]]) lcv(b, M.steel, F, 0.05, -1.4, v0, v1, 0.5, 10);
+  // exit trough with two pneumatic guide stands
+  lbox(b, M.steelDark, F, -0.1, 0.1, 0.75, 3.3, 0.86, 0.95);
+  for (const vv of [1.45, 3.05]) { lbox(b, M.tableFrame, F, -0.15, 0.48, vv - 0.15, vv + 0.15, 0, 0.86); lcu(b, M.machine, F, 0.05, 0.1, 0.46, vv, 1.05, 10); }
+}
+// cantilever pinch roll: roll box, short spindles, two-speed reducer cum pinion stand, DC motor
+function pinchUnit(b, F, o) {
+  const { hv, gb, m, w, pad } = o;
+  lbox(b, M.plate, F, -0.2, gb[1] + 0.05, -hv - 0.05, hv + 0.11, 0, 0.08);
+  lbox(b, M.machine, F, 0.05, 0.55, -hv, hv, 0.08, 1.45);
+  lbox(b, M.machineDark, F, 0.04, 0.56, -hv - 0.02, hv + 0.02, 0.98, 1.02);
+  for (const y of [1.17, 0.83]) { lcu(b, M.roll, F, 0.155, -0.13, -0.04, 0, y, 24); lcu(b, M.steelDark, F, 0.07, -0.04, 0.05, 0, y, 12); }
+  lcy(b, M.machine, F, 0.06, 0.3, 0, 1.45, 1.78, 12);
+  lcy(b, M.roll, F, 0.025, 0.3, 0, 1.78, 1.95, 8);
+  lcv(b, M.steelDark, F, 0.045, -0.08, -hv - 0.25, -0.2, 1.0, 10);
+  lcv(b, M.steelDark, F, 0.045, -0.08, 0.2, hv + 0.25, 1.0, 10);
+  for (const y of [1.17, 0.83]) cardan(b, F, 0.56, y, gb[0] - 0.02, y, 0, 0.1);
+  if (pad > 0.05) lbox(b, M.concrete, F, m[0] + 0.02, m[1] - 0.02, -w / 2 - 0.08, w / 2 + 0.08, 0, pad - 0.01);
+  const ay = dcMotor(b, F, m[0], m[1] - m[0], 0, pad, { w });
+  gearBox(b, F, { parts: [[gb[0], gb[1], -hv, hv + 0.06, 1.45]], base: 0.08, fb: 0.07, split: 1.17, capR: 0.13,
+    outs: [[gb[0], 0, 1.17], [gb[0], 0, 0.83]], ins: [[gb[1], 0, ay]], caps: [[gb[1], gb[1] + 0.05, 0.18, 1.2, 0.12]] });
+  gearCoupling(b, F, gb[1] + 0.05, m[0] - 0.04, 0, ay, 0.12);
+}
+// 426,5 CRS continuous shear: cantilevered knife drums, DC 45 kW; servo-driven entry divider and exit nozzles
+function contShear(b, F) {
+  lbox(b, M.plate, F, -0.25, 1.12, -0.75, 0.75, 0, 0.08);
+  lbox(b, M.concrete, F, 1.22, 2.23, -0.25, 0.25, 0, 0.11);
+  const ay = dcMotor(b, F, 1.2, 1.05, 0, 0.12, { w: 0.46 });
+  gearBox(b, F, { parts: [[0.05, 1.0, -0.675, 0.675, 1.55]], base: 0.08, fb: 0.07, split: 1.213, capR: 0.18,
+    ins: [[1.0, 0, ay]], caps: [[-0.01, 0.05, 0, 1.213, 0.21], [-0.01, 0.05, 0, 0.787, 0.21]] });
+  for (const y of [1.213, 0.787]) lcu(b, M.machineDark, F, 0.19, -0.22, -0.01, 0, y, 24);
+  lbox(b, M.steel, F, -0.2, -0.03, -0.04, 0.04, 1.02, 1.12);
+  lbox(b, M.steel, F, -0.2, -0.03, -0.04, 0.04, 0.88, 0.98);
+  gearCoupling(b, F, 1.04, 1.16, 0, ay, 0.11);
+  lbox(b, M.tableFrame, F, -0.2, 0.2, -2.1, -0.78, 0, 0.88);
+  lcv(b, M.steelDark, F, 0.07, 0, -2.12, -0.7, 1.0, 12);
+  lbox(b, M.gear, F, 0.25, 0.5, -1.05, -0.8, 0.5, 0.76);
+  lcu(b, M.motor, F, 0.08, 0.5, 0.8, -0.925, 0.63, 12);
+  for (const s of [-1, 1]) pipe(b, M.steelDark, 0.07, FP(F, s * 0.02, 0.72, 1.0), FP(F, s * 0.2, 1.55, 1.0), 12, 0.11);
+}
+// 1100 CRS flying / crank shear: big gear housing, cantilevered crank drums, DC 300 kW; pneumatic entry divider
+function flyShear(b, F) {
+  lbox(b, M.plate, F, -0.35, 1.3, -0.95, 0.95, 0, 0.1);
+  lbox(b, M.concrete, F, 1.57, 3.03, -0.45, 0.45, 0, 0.38);
+  const ay = dcMotor(b, F, 1.55, 1.5, 0, 0.39);
+  gearBox(b, F, { parts: [[0.05, 1.15, -0.85, 0.8, 2.2]], base: 0.1, fb: 0.1, split: 1.55, capR: 0.26,
+    ins: [[1.15, 0, ay]], caps: [[-0.01, 0.05, 0, 1.55, 0.3], [-0.01, 0.05, 0, 0.45, 0.3], [1.15, 1.2, 0, 1.55, 0.26]] });
+  for (const y of [1.55, 0.45]) lcu(b, M.machineDark, F, 0.3, -0.3, -0.01, 0, y, 26);
+  lbox(b, M.steel, F, -0.27, -0.04, -0.1, 0.1, 1.03, 1.25);
+  lbox(b, M.steel, F, -0.27, -0.04, -0.1, 0.1, 0.75, 0.97);
+  gearCoupling(b, F, 1.19, 1.51, 0, ay, 0.17);
+  lbox(b, M.tableFrame, F, -0.2, 0.2, -1.5, -0.97, 0, 0.88);
+  pipe(b, M.steelDark, 0.06, FP(F, 0, -1.45, 1.0), FP(F, 0, -0.97, 1.0), 12, 0.13);
+  lbox(b, M.steelDark, F, -0.08, 0.08, -0.95, -0.45, 0.94, 1.06);
+  lcu(b, M.machine, F, 0.05, -0.62, -0.1, -0.42, 1.0, 10);
+  lbox(b, M.tableFrame, F, -0.72, -0.6, -0.5, -0.34, 0, 1.06);
+}
+for (const [k, xc] of [['shear1', 2113400], ['shear2', 2137100]]) {
+  make(k, 14, { title: k === 'shear1' ? 'Ножницы 610 CRS между C2 и C3' : 'Ножницы 610 CRS между C8 и C9',
+    facts: ['Обрезка переднего конца и аварийная резка раската', 'Двигатель постоянного тока 175 кВт; кривошипы 610 CRS, i = 3,73', 'Жёлоб и бункер для обрези со стороны ряда А'],
+    dwg: (k === 'shear1' ? '527-257p1sh01 r1 · 527-257p1sh03' : '527-257p1sh02 r1 · 527-257p1sh04') + ' · план 527-101sh01 r8' },
+  (b) => cropShear(b, { x: X(xc), z: LINE_Z, d: '-z' }), equipRoot);
 }
 for (const [i, xa, xb] of [[1, 2146477, 2149073], [2, 2151942, 2154539], [3, 2157435, 2160032]]) {
   make('looper' + i, 18, { title: `Петлеобразователь ${['C10–C11', 'C12–C13', 'C14–C15'][i - 1]}`, en: 'Single Strand Vertical Looper with Snap Shear', facts: ['Вертикальная петля для прокатки без натяжения между клетями', 'С отрезными ножницами (snap shear)'], dwg: `527-261p1sh0${i} r1` }, (b) => {
@@ -1347,21 +1691,19 @@ const unit = (key, no, info, xa, xb, ya, yb, h, motor = true) => make(key, no, i
   cyl(b, M.roll, 0.16, 0.7, 'z', (x0 + x1) / 2, PASS, LINE_Z, 14);
   if (motor) { const zm = Z(yb) + 0.6; motorZ(b, (x0 + x1) / 2, 1.1, zm, 0.34, 1.1); box(b, M.gear, Math.min(1.2, x1 - x0), 1.3, 0.8, (x0 + x1) / 2, 0.15, (LINE_Z - 0.5 + zm + 0.55) / 2); }
 }, equipRoot);
-unit('pinch21', 21, { facts: ['Консольные тянущие ролики после зоны охлаждения'], dwg: '527-286p2sh01 r1' }, 2176429, 2177627, -703064, -700343, 1.6);
-unit('shear22', 22, { facts: ['Непрерывно вращающиеся ножи режут готовый пруток на длину холодильника', 'Момент реза задают диверторы с серводвигателем'], dwg: '527-321p1sh01 r1' }, 2177711, 2181369, -703196, -700762, 1.9);
-make('shear23', 23, { facts: ['Летучие ножницы кривошипного типа 1100 CRS: порезка на мерные длины холодильника'], dwg: '527-321p2sh01 r1' }, (b) => {
-  const x0 = X(2181396), x1 = X(2183888), cx = (x0 + x1) / 2;
-  box(b, M.plate, x1 - x0 + 0.3, 0.2, 2.2, cx, 0, LINE_Z - 0.6);
-  boxMM(b, M.machine, x0, 0.2, LINE_Z + 0.45, x1, 2.4, LINE_Z - 1.2);
-  cyl(b, M.machineDark, 0.75, 0.32, 'z', cx, 1.5, LINE_Z - 1.45, 26);
-  motorZ(b, cx, 1.2, Z(-699700) + 0.7, 0.42, 1.4);
-}, equipRoot);
+make('pinch21', 21, { facts: ['Консольные тянущие ролики после зоны охлаждения', 'DC 45 кВт, двухскоростной редуктор-шестерённая клеть 300 CRS'], dwg: '527-286p2sh01 r1 · план 527-101sh01 r8' },
+  (b) => pinchUnit(b, { x: X(2177100), z: LINE_Z, d: '-z' }, { hv: 0.42, gb: [0.9, 1.45], m: [1.6, 2.55], w: 0.5, pad: 0.12 }), equipRoot);
+make('shear22', 22, { facts: ['Непрерывно вращающиеся ножи режут готовый пруток на длину холодильника', 'Момент реза задают диверторы с серводвигателем 5,5 кВт', 'Ножи 426,5 CRS, двигатель постоянного тока 45 кВт'], dwg: '527-321p1sh01 r1 · план 527-101sh01 r8' },
+  (b) => contShear(b, { x: X(2179825), z: LINE_Z, d: '-z' }), equipRoot);
+make('shear23', 23, { facts: ['Летучие ножницы кривошипного типа 1100 CRS: порезка на мерные длины холодильника', 'DC 300 кВт, 0–700 об/мин; пневматический дивертор на входе'], dwg: '527-321p2sh01 r1 · план 527-101sh01 r8' },
+  (b) => flyShear(b, { x: X(2182850), z: LINE_Z, d: '-z' }), equipRoot);
 make('funnel', 24, { facts: ['Направляющий жёлоб от летучих ножниц к тормозным роликам, ≈ 10,5 м'], dwg: '527-322p1sh01 r1' }, (b) => {
   const x0 = X(2183664), x1 = X(2194217);
   box(b, M.steelDark, x1 - x0, 0.22, 0.36, (x0 + x1) / 2, PASS - 0.15, LINE_Z);
   for (let x = x0 + 0.4; x < x1; x += 1.3) box(b, M.tableFrame, 0.14, PASS - 0.15, 0.6, x, 0, LINE_Z);
 }, equipRoot);
-unit('pinch25', 25, { facts: ['Двухскоростные тормозные ролики: тормозят пруток, чтобы он лёг на холодильник в своё место', 'Две линии роликов работают поочерёдно'], dwg: '527-296p1sh01 r1' }, 2194354, 2196127, -703120, -700007, 1.7);
+make('pinch25', 25, { facts: ['Двухскоростные тормозные ролики: тормозят пруток, чтобы он лёг на холодильник в своё место', 'Две линии роликов работают поочерёдно', 'Двигатели постоянного тока 60 кВт — 2 шт.'], dwg: '527-296p1sh01 r1 · план 527-101sh01 r8' },
+  (b) => { for (const x of [2194850, 2195650]) pinchUnit(b, { x: X(x), z: LINE_Z, d: '-z' }, { hv: 0.38, gb: [1.3, 1.75], m: [1.85, 2.95], w: 0.55, pad: 0.12 }); }, equipRoot);
 unit('pinch26', 26, { facts: ['Пружинные тянущие ролики 300 CRS перед холодильником'], dwg: '527-457p1sh01 r0' }, 2196331, 2197172, -703428, -701474, 1.5, false);
 
 // ---------------------------------------------------------------------------
